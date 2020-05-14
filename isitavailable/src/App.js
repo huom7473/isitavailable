@@ -6,6 +6,7 @@ import {
   //Marker,
   //InfoWindow
 } from "react-google-maps";
+
 //import mapStyles from "./mapStyles";
 
 function Map() {
@@ -25,7 +26,7 @@ export default function App() {
     <div style={{ width: "100vw", height: "100vh" }}>
       <MapWrapped
         googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
-          "AIzaSyCLQoz-tl2amrxg2CISg0RxxDaFjWeHpUE"
+          process.env.REACT_APP_GOOGLE_KEY
         }`}
 
         //googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places`}
