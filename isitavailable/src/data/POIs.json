@@ -1,0 +1,12 @@
+[
+    {
+        "NAME": "Ralphs",
+        "COORDINATES": [34.062659, -118.443941], 
+        "DESCRIPTION": "Retail chain offering home goods, clothing, electronics & more, plus exclusive designer collections."
+    },
+    {
+        "NAME": "Chick-Fil-A",
+        "COORDINATES": [34.063590, -118.445153],
+        "DESCRIPTION": "Fast-food chain serving chicken sandwiches, strips & nuggets along with salads & sides."
+    }
+]
