@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
-  withGoogleMap,
-  withScriptjs,
   GoogleMap,
+  useLoadScript,
   Marker,
-  InfoWindow 
-} from "react-google-maps";
+  InfoWindow,
+} from "@react-google-maps/api";
 import POIs from "./data/POIs.json"
 
-//import mapStyles from "./mapStyles";
-
-function RawMap() {
-  const [selectedPOI, setSelected] = useState(null);
+function Map() {
+  const [selectedPOI, setSelected] = React.useState(null);
 
   return (
-    <GoogleMap
-      defaultZoom={15.5}
-      defaultCenter={{lat : 34.069, lng: -118.445}} //start at UCLA for now
-    >
+    <GoogleMap 
+          mapContainerStyle={mapContainerStyles}
+          zoom={defaultZoom}
+          center={defaultCenter}>
         {POIs.map(place => 
         (<Marker
           key = {place.NAME}
@@ -39,22 +36,26 @@ function RawMap() {
   );
 }
 
-
-const Map = withScriptjs(withGoogleMap(RawMap));
+const libraries = ["places"];
+const mapContainerStyles = {
+  width: "100vw",
+  height: "100vh",
+};
+const defaultCenter = {lat : 34.069, lng: -118.445};
+const defaultZoom = 15.5;
 
 export default function App() {
-  return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <Map
-        googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
-          process.env.REACT_APP_GOOGLE_KEY
-        }`}
+    const {isLoaded, loadError} = useLoadScript({
+      googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+      libraries: libraries
+    })
 
-        //googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places`}
-        loadingElement={<div style={{ height: `100%` }} />}
-        containerElement={<div style={{ height: `100%` }} />}
-        mapElement={<div style={{ height: `100%` }} />}
-      />
-    </div>
-  );
+    if (loadError) return "Maps failed to load. Please try again later or check connection.";
+    if (!isLoaded) return "Loading maps...";
+
+    return (
+      <div>
+        <Map/>
+      </div>
+    );
 }
