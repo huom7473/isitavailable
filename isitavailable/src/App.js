@@ -6,6 +6,16 @@ import {
   InfoWindow,
 } from "@react-google-maps/api";
 import POIs from "./data/POIs.json"
+import mapTheme from "./mapTheme.js"
+
+const libraries = ["places"];
+const mapContainerStyles = {
+  width: "100vw",
+  height: "100vh",
+};
+const defaultCenter = {lat : 34.069, lng: -118.445};
+const defaultZoom = 15.5;
+const options = {styles: mapTheme}
 
 function Map() {
   const [selectedPOI, setSelected] = React.useState(null);
@@ -14,7 +24,8 @@ function Map() {
     <GoogleMap 
           mapContainerStyle={mapContainerStyles}
           zoom={defaultZoom}
-          center={defaultCenter}>
+          center={defaultCenter}
+          options = {options}>
         {POIs.map(place => 
         (<Marker
           key = {place.NAME}
@@ -36,13 +47,7 @@ function Map() {
   );
 }
 
-const libraries = ["places"];
-const mapContainerStyles = {
-  width: "100vw",
-  height: "100vh",
-};
-const defaultCenter = {lat : 34.069, lng: -118.445};
-const defaultZoom = 15.5;
+
 
 export default function App() {
     const {isLoaded, loadError} = useLoadScript({
