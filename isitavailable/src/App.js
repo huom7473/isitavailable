@@ -8,6 +8,8 @@ import {
 import POIs from "./data/POIs.json"
 import mapTheme from "./mapTheme.js"
 
+const icons = {"R": "restaurant.svg", "G": "grocery.png"};
+
 const libraries = ["places"];
 const mapContainerStyles = {
   width: "100vw",
@@ -30,7 +32,11 @@ function Map() {
         (<Marker
           key = {place.NAME}
           position = {{lat: place.COORDINATES[0], lng: place.COORDINATES[1]}}
-          onClick = {() => setSelected(place)}/>)
+          onClick = {() => setSelected(place)}
+          icon = {{
+            url: icons[place.TYPE],
+            scaledSize: new window.google.maps.Size(40, 40)}}
+          />)
           )}
           {selectedPOI && //boolean "trick" used here - might want to change to something a bit less cryptic in the future
           <InfoWindow
