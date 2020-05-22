@@ -1,4 +1,5 @@
 import React from "react";
+import * as firebase from "firebase";
 import {
   GoogleMap,
   useLoadScript,
@@ -19,43 +20,78 @@ const defaultCenter = {lat : 34.069, lng: -118.445};
 const defaultZoom = 15.5;
 const options = {styles: mapTheme}
 
+const config = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  databaseURL: "https://fhello-b514c.firebaseio.com",
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+};
+firebase.initializeApp(config);
+
+
+
 class Map extends React.Component {
   constructor(props){
     super(props);
-    this.state = {selectedPOI: null};
+    this.state = {
+      selectedPOI: null,
+      items: [],
+    };
   }
 
   render() {
-
     return (
       <GoogleMap 
             mapContainerStyle={mapContainerStyles}
             zoom={defaultZoom}
             center={defaultCenter}
             options = {options}>
-          {POIs.map(place => 
+          {this.state.items.map(place => 
           (<Marker
-            key = {place.NAME}
-            position = {{lat: place.COORDINATES[0], lng: place.COORDINATES[1]}}
+            key = {place.name}
+            position = {{lat: place.lat, lng: place.long}}
             onClick = {() => this.setState({selectedPOI: place})}
             icon = {{
-              url: icons[place.TYPE],
+              url: icons[place.type],
               scaledSize: new window.google.maps.Size(40, 40)}}
             />)
             )}
             {this.state.selectedPOI && //boolean "trick" used here - might want to change to something a bit less cryptic in the future
             <InfoWindow
-              position = {{lat: this.state.selectedPOI.COORDINATES[0], lng: this.state.selectedPOI.COORDINATES[1]}}
+              position = {{lat: this.state.selectedPOI.lat, lng: this.state.selectedPOI.long}}
               onCloseClick = {() => this.setState({selectedPOI: null})}
               >
                 <div>
-                  <h2>{this.state.selectedPOI.NAME}</h2>
-                  <p>{this.state.selectedPOI.DESCRIPTION}</p>
+                  <h2>{this.state.selectedPOI.name}</h2>
+                  <p>{this.state.selectedPOI.description}</p>
                 </div>
             </InfoWindow>
             }
       </GoogleMap>
     );
+    }
+
+    componentDidMount() {
+      const itemsRef = firebase.database().ref('Stores')
+      itemsRef.on('value', snap => {
+        let items = snap.val();
+        let newState = [];
+        for(let item in items) {
+          console.log("pushing item" + item);
+          newState.push({
+            name: item,
+            description: items[item].description,
+            lat: items[item].lat,
+            long: items[item].long,
+            type: items[item].type,
+          });
+        }
+        this.setState({
+          items: newState
+        });
+      });
     }
 }
 
