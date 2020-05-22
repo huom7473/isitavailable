@@ -1,5 +1,5 @@
 import React from "react";
-import * as firebase from "firebase";
+import firebase from './firebase.js'
 import {
   GoogleMap,
   useLoadScript,
@@ -19,17 +19,6 @@ const mapContainerStyles = {
 const defaultCenter = {lat : 34.069, lng: -118.445};
 const defaultZoom = 15.5;
 const options = {styles: mapTheme}
-
-const config = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  databaseURL: "https://fhello-b514c.firebaseio.com",
-  projectId: process.env.REACT_APP_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-};
-firebase.initializeApp(config);
-
 
 
 class Map extends React.Component {
