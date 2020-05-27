@@ -96,9 +96,20 @@ export default function App() {
       mapRef.current = map;
     }, []);
 
+    const smoothZoom = (current, end) => {
+      console.log("starting from", current);
+      while (current < end) {
+        setTimeout(() => {
+          console.log("setting zoom to", current + 1);
+          mapRef.current.setZoom(current + 1);
+        }, 1000);
+        current++;
+      }
+    }
+
     const pan = React.useCallback(({lat, lng}) => {
       mapRef.current.panTo({lat, lng});
-      mapRef.current.setZoom(defaultZoom);
+      smoothZoom(mapRef.current.getZoom(), defaultZoom);
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
