@@ -27,3 +27,13 @@ code {
   font-size: 1.5rem;
   width: 100%;
 }
+
+.removeButton {
+  position: absolute;
+  background-color: red;
+  top: 95%;
+  left: 95%;
+  height: 2rem;
+  max-width: 400px;
+  z-index: 10;
+}

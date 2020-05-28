@@ -54,7 +54,7 @@ class Map extends React.Component {
             center={defaultCenter}
             options={options}
             onLoad={this.props.onLoad}>
-          {POIs.map(place => 
+          {/* {POIs.map(place => 
           (<Marker
             key = {place.COORDINATES}
             position = {{lat: place.COORDINATES[0], lng: place.COORDINATES[1]}}
@@ -77,7 +77,7 @@ class Map extends React.Component {
                   <p>{this.state.selectedPOI.DESCRIPTION}</p>
                 </div>
             </InfoWindow>
-            }
+            } */}
       </GoogleMap>
     );
     }
@@ -91,10 +91,13 @@ export default function App() {
     })
 
     const mapRef = React.useRef();
-    
+
     const onLoad = React.useCallback((map) => {
       mapRef.current = map;
+      loadMarkers(["groceries"]);
     }, []);
+
+    var markers = [];
 
     const smoothZoom = (current, end) => {
       console.log("starting from", current);
@@ -107,9 +110,51 @@ export default function App() {
       }
     }
 
+    const removeMarkers = React.useCallback(() => {
+      //console.log(markers);
+      for(let i = 0; i < markers.length; i++){
+        markers[i].setMap(null);
+      }
+      markers = [];
+    }, [])
+
+    const loadMarkers = (keywords) => {
+      const center = mapRef.current.getCenter();
+      const proxyurl = "https://cors-anywhere.herokuapp.com/";
+      for(let i = 0; i < keywords.length; i++) { //handles multiple keywords
+        const keyword = keywords[i];
+        fetch(proxyurl+
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key="
+        +process.env.REACT_APP_GOOGLE_MAPS_API_KEY+
+        "&location="+center.lat() + "," + center.lng()+
+        "&radius=10000&keyword="+keyword)
+        .then(response => response.json())
+        .then(results => {
+          for(let i = 0; i < results.results.length; i++){
+            var marker = new window.google.maps.Marker({
+              position: results.results[i].geometry.location,
+              map: mapRef.current,
+              icon: {
+                url: icons["G"],
+                scaledSize: new window.google.maps.Size(40, 40),
+                origin: new window.google.maps.Point(0,0),
+                anchor: new window.google.maps.Point(20, 20)}
+            });
+            marker.addListener('click', (event) => alert(results.results[i].name));
+            markers.push(marker);
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+      }
+      
+    }
+
     const pan = React.useCallback(({lat, lng}) => {
       mapRef.current.panTo({lat, lng});
       smoothZoom(mapRef.current.getZoom(), defaultZoom);
+      loadMarkers(["groceries"]);
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
@@ -117,6 +162,7 @@ export default function App() {
 
     return (
       <div>
+        <button className="removeButton" onClick={removeMarkers}>Clear POIs</button>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
       </div>
@@ -148,7 +194,6 @@ function Search({ pan }) {
     getGeocode({ address: description })
       .then(results => getLatLng(results[0]))
       .then(({ lat, lng }) => {
-        console.log("panning to ", { lat, lng });
         pan({lat, lng});
       }).catch(error => {
         console.log(error)
