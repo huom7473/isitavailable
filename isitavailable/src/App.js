@@ -1,4 +1,5 @@
 import React from "react";
+import firebase from './firebase.js'
 import {
   GoogleMap,
   useLoadScript,
@@ -113,7 +114,7 @@ export default function App() {
                 origin: new window.google.maps.Point(0,0),
                 anchor: new window.google.maps.Point(20, 20)}
             });
-            marker.addListener('click', (event) => alert(results.results[i].name));
+            marker.addListener('click', (event) => LoadLocation(results.results[i].name, results.results[i].geometry.location.lat, results.results[i].geometry.location.lng, results.results[i].types));
             markers.push(marker);
           }
         })
@@ -142,6 +143,67 @@ export default function App() {
       </div>
     );
 }
+
+function LoadLocation(newName, latitude, longitude, storeType){
+
+  console.log("LAT: " + latitude);
+
+  const itemsRef = firebase.database().ref('stores') 
+  itemsRef.on('value', snap => {
+    let items = snap.val();
+    let newState = [];
+    for(let item in items) {
+      if(items[item].lat === latitude && items[item].long === longitude){
+        console.log("already in db!");
+        return;
+      }
+    }
+
+    var itemData;
+    console.log("not in db yet");
+    for (let items in storeType){
+    
+    if(storeType[items].includes("grocery")){
+      
+      itemData = {
+        eggs: -1,
+        milk: -1,
+      }
+      break;
+    } 
+    else if (storeType[items].includes("restaurant")){
+      itemData = {
+        open: -1,
+      } 
+      break;
+    }
+    else {
+      itemData = {
+        noItems: 0,
+      } 
+    }
+  }
+
+  var postData = {
+    name: newName,
+    lat: latitude,
+    long: longitude,
+  };
+
+  var newPostKey = firebase.database().ref().child('posts').push().key;
+
+  console.log("writing to db");
+  firebase.database().ref().child('/stores/' + newPostKey).set(postData);
+  firebase.database().ref().child('/stores/' + newPostKey + '/items').set(itemData);
+  console.log("exiting loadlocation function");
+  return;
+
+  });
+  
+
+  
+}
+
 
 function Search({ pan }) {
   const {
