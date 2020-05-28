@@ -16,13 +16,10 @@ import {
   ComboboxList,
   ComboboxOption,
 } from "@reach/combobox";
-import { formatRelative } from "date-fns";
 
 import "@reach/combobox/styles.css";
 
-import POIs from "./data/POIs.json"
 import mapTheme from "./mapTheme.js"
-import { JsxEmit } from "typescript";
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
 
@@ -54,30 +51,6 @@ class Map extends React.Component {
             center={defaultCenter}
             options={options}
             onLoad={this.props.onLoad}>
-          {/* {POIs.map(place => 
-          (<Marker
-            key = {place.COORDINATES}
-            position = {{lat: place.COORDINATES[0], lng: place.COORDINATES[1]}}
-            onClick = {() => this.setState({selectedPOI: place})}
-            icon = {{
-              url: icons[place.TYPE],
-              scaledSize: new window.google.maps.Size(40, 40),
-              origin: new window.google.maps.Point(0,0),
-              anchor: new window.google.maps.Point(20, 20)}}
-            />)
-            )}
-            {this.state.selectedPOI && //boolean "trick" used here - might want to change to something a bit less cryptic in the future
-            <InfoWindow
-              position = {{lat: this.state.selectedPOI.COORDINATES[0], lng: this.state.selectedPOI.COORDINATES[1]}}
-              onCloseClick = {() => this.setState({selectedPOI: null})}
-              onUnmount = {() => this.setState({selectedPOI: null})}
-              >
-                <div>
-                  <h2>{this.state.selectedPOI.NAME}</h2>
-                  <p>{this.state.selectedPOI.DESCRIPTION}</p>
-                </div>
-            </InfoWindow>
-            } */}
       </GoogleMap>
     );
     }
@@ -90,11 +63,10 @@ export default function App() {
       libraries: libraries
     })
 
-    const mapRef = React.useRef();
-
+    let mapRef;
     const onLoad = React.useCallback((map) => {
-      mapRef.current = map;
-      loadMarkers(["groceries"]);
+      mapRef = map;
+      loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
     }, []);
 
     var markers = [];
@@ -104,25 +76,26 @@ export default function App() {
       while (current < end) {
         setTimeout(() => {
           console.log("setting zoom to", current + 1);
-          mapRef.current.setZoom(current + 1);
+          mapRef.setZoom(current + 1);
         }, 1000);
         current++;
       }
     }
 
     const removeMarkers = React.useCallback(() => {
-      //console.log(markers);
+      console.log(markers);
       for(let i = 0; i < markers.length; i++){
         markers[i].setMap(null);
       }
       markers = [];
     }, [])
 
-    const loadMarkers = (keywords) => {
-      const center = mapRef.current.getCenter();
+    const loadMarkers = (keypairs) => {
+      const center = mapRef.getCenter();
       const proxyurl = "https://cors-anywhere.herokuapp.com/";
-      for(let i = 0; i < keywords.length; i++) { //handles multiple keywords
-        const keyword = keywords[i];
+      for(let i = 0; i < keypairs.length; i++) { //handles multiple keywords
+        const keyword = keypairs[i].keyword;
+        const iconName = keypairs[i].iconName;
         fetch(proxyurl+
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key="
         +process.env.REACT_APP_GOOGLE_MAPS_API_KEY+
@@ -133,9 +106,9 @@ export default function App() {
           for(let i = 0; i < results.results.length; i++){
             var marker = new window.google.maps.Marker({
               position: results.results[i].geometry.location,
-              map: mapRef.current,
+              map: mapRef,
               icon: {
-                url: icons["G"],
+                url: icons[iconName],
                 scaledSize: new window.google.maps.Size(40, 40),
                 origin: new window.google.maps.Point(0,0),
                 anchor: new window.google.maps.Point(20, 20)}
@@ -152,9 +125,10 @@ export default function App() {
     }
 
     const pan = React.useCallback(({lat, lng}) => {
-      mapRef.current.panTo({lat, lng});
-      smoothZoom(mapRef.current.getZoom(), defaultZoom);
-      loadMarkers(["groceries"]);
+      console.log({lat, lng});
+      mapRef.panTo({lat, lng});
+      smoothZoom(mapRef.getZoom(), defaultZoom);
+      loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
@@ -162,7 +136,7 @@ export default function App() {
 
     return (
       <div>
-        <button className="removeButton" onClick={removeMarkers}>Clear POIs</button>
+        <button className="removeButton" onClick={() => {console.log("hi"); removeMarkers(); console.log("hi2")}}>Clear POIs</button>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
       </div>
