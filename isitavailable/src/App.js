@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Component} from "react";
 import firebase from './firebase.js'
 import {
   GoogleMap,
@@ -23,6 +23,7 @@ import "@reach/combobox/styles.css";
 import mapTheme from "./mapTheme.js"
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
+
 
 const libraries = ["places"];
 const mapContainerStyles = {
@@ -135,11 +136,26 @@ export default function App() {
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
     if (!isLoaded) return "Loading maps...";
 
+    let itemList = [];
+    const itemsRef = firebase.database().ref('items') 
+    itemsRef.on('value', snap => {
+      
+      let items = snap.val();
+      console.log("items: " + items);
+      for(let item in items) {
+        console.log("pushing " + items[item].item);
+      
+        items.push({
+          item: items[item].item,
+        });
+      }
+    }); 
     return (
       <div>
         <button className="removeButton" onClick={() => {console.log("hi"); removeMarkers(); console.log("hi2")}}>Clear POIs</button>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
+        <ItemSearch />
       </div>
     );
 }
@@ -255,4 +271,54 @@ function Search({ pan }) {
       </Combobox>
     </div>
   );
+}
+
+
+class ItemSearch extends Component{
+  constructor(){
+    super();
+    this.state = {
+      itemList: []
+    }
+  }
+  componentDidMount(){
+    const itemsRef = firebase.database().ref('items');
+    itemsRef.on('value', snap => {
+      let items = snap.val();
+      let itemNames = [];
+      for(let item in items) {
+        itemNames.push({
+          item: items[item].item,
+        });
+      }
+      console.log("im here now: " + itemNames);
+      this.setState({
+        itemList: itemNames
+      });
+    });
+  }
+  render(){
+    const handleInput = (e) => {
+    };
+    const handleSelect = () => {
+      console.log("selected");
+
+      //remove markers 
+    };
+    return (
+      <div className = "search2">
+        <Combobox onSelect={handleSelect} aria-labelledby="searchbox">
+          <ComboboxInput onChange={handleInput} placeholder="Search for an item..."/>
+          <ComboboxPopover>
+            <ComboboxList>
+              {this.state.itemList.map(({ id, item} ) => (
+                  <ComboboxOption key={id} value={item}>
+                  </ComboboxOption>
+                ))}
+            </ComboboxList>
+          </ComboboxPopover>
+        </Combobox>
+      </div>
+    );
+  }
 }
