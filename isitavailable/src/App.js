@@ -137,7 +137,7 @@ export default function App() {
 
     return (
       <div>
-        <button className="removeButton" onClick={() => {console.log("hi"); removeMarkers(); console.log("hi2")}}>Clear POIs</button>
+        <button className="removeButton" onClick={removeMarkers}>Clear POIs</button>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
       </div>
@@ -236,9 +236,15 @@ function Search({ pan }) {
       });
   };
  
+  const handleKeyPress = (event) => {
+    if(event.key === 'Enter'){
+      handleSelect(value);
+    }
+  }
+
   return (
     <div className = "search">
-      <Combobox onSelect={handleSelect} aria-labelledby="searchbox">
+      <Combobox onSelect={handleSelect} aria-labelledby="searchbox" onKeyPress={handleKeyPress}>
         <ComboboxInput value={value} onChange={handleInput} disabled={!ready} placeholder="Search for a place..."/>
         <ComboboxPopover>
           <ComboboxList>
