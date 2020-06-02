@@ -188,26 +188,32 @@ class GroceryInterface extends React.Component {
   }
 
   handleChange(e) {
-    console.log(e.target.value);
+    //console.log(e.target.value);
     this.setState({searchVal: e.target.value});
   }
 
   render() {
+    var widgets = this.getItems().map(desc => {
+      return (desc.name.includes(this.state.searchVal) ?
+      <ItemWidget 
+        key={desc.name}
+        location={this.props.location} 
+        itemName={desc.name}
+        src={desc.src}
+      /> : null)
+    })
+    
+    if(widgets.every(v => !v)) { //if all entries in widgets are null (i.e. no items match filter)
+      widgets = "No items match your search. Try another one."
+    }
+
     return (
       <div>
       <Combobox aria-labelledby="searchbox">
         <ComboboxInput id="filterInput" onChange={e => this.handleChange(e)} placeholder="Filter items..."/>
       </Combobox>
       <br/> <br/>
-      {this.getItems().map(desc => {
-        return (desc.name.includes(this.state.searchVal) ?
-        <ItemWidget 
-          key={desc.name}
-          location={this.props.location} 
-          itemName={desc.name}
-          src={desc.src}
-        /> : null)
-      })}
+      {widgets}
       </div>
     );
   }
@@ -221,7 +227,6 @@ class Sidebar extends React.Component {
     var content;
     switch(this.props.selected.typeShort) {
       case 'G':
-        //console.log("chungus!!!!!!!!!1")
         content =
           <GroceryInterface
             location = {this.props.selected.geometry.location}/>;
