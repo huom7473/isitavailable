@@ -26,6 +26,9 @@ import mapTheme from "./mapTheme.js"
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
 
+const itemIcons = {"eggs": "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg", 
+"milk": "https://hq.recyclist.co/wp-content/uploads/2015/02/milkgallon-300x300.jpg", "rice" : "https://d2d8wwwkmhfcva.cloudfront.net/800x/d2lnr5mha7bycj.cloudfront.net/product-image/file/large_7e52a534-621e-4aea-b085-845b5f5e2c01.jpg"}
+
 const libraries = ["places"];
 const mapContainerStyles = {
   width: "100vw",
@@ -125,21 +128,91 @@ class RestaurantInterface extends React.Component {
 class ItemWidget extends React.Component {
   constructor(props){
     super(props);
+    this.state = {
+      changed: false,
+      in: 0,
+      out: 0
+    }
+
   }
 
   handleStockChange(status) { //use location prop (this.props.location)
     alert(status ? "in stock request for " + this.props.itemName : "out of stock request for " + this.props.itemName);
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let stores = snap.val();
+      let d = new Date();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+          console.log(d);
+
+          let itemReport = {
+            status: status ? "in_stock" : "out_of_stock",
+            time: d.toString()
+          };
+  
+          var newPostKey = firebase.database().ref().push().key;
+          firebase.database().ref().child('/stores/' + store + '/items/' + this.props.itemName + '/' + newPostKey).set(itemReport);
+          this.setState({
+            changed: !this.state.changed
+          });
+          break;
+        }
+      }
+    });
+    
     //update database with new stock status instead of alerting
   }
 
   getReports() { //get # of reports with status {status} from past three hours
     //possibly also delete entries that are too old
-    return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let inCount = 0;
+      let outCount = 0;
+      let stores = snap.val();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+          let items = stores[store].items;
+          for(let item in items){
+
+
+            if(this.props.itemName === item){
+              for(let reports in items[item]){
+                let dt = new Date(items[item][reports].time);
+                let dtn = new Date();
+                let diff = (dtn.getTime() - dt.getTime())/3600000;
+                //console.log("diff in time: " + diff);
+                if(diff >= 3.0){
+                  const ref = firebase.database().ref('stores/' + store + '/items/' + item + '/' + reports);
+                  ref.remove();
+                }
+
+                if(items[item][reports].status === "in_stock"){
+                  inCount++;
+                } else {
+                  outCount++;
+                }
+              }
+            }
+          }
+        
+        }
+      }
+      if(inCount != this.state.in || outCount != this.state.out){
+        this.setState({
+          in: inCount,
+          out: outCount
+        });
+      }
+      return;
+      //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
+    });
   }
 
   render() {
-    const reports = this.getReports();
-    const ratio = reports.in/(reports.in + reports.out);
+    this.getReports();
+    const ratio = this.state.in/(this.state.in + this.state.out);
     return (
       <div className="container mb-4">
         <div className="row row-cols-3">
@@ -151,10 +224,10 @@ class ItemWidget extends React.Component {
             <Button block variant="success" className = "mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
             <Button block variant="danger" onClick={() => this.handleStockChange(false)}>Out of Stock</Button>
           </div>
-          <div className="col text-center">
-            <span className="text-warning">In Stock Reports: {reports.in}</span>
+          <div class="col text-center">
+            <span class="text-warning">In stock Reports: {this.state.in}</span>
             <br/>
-            <span className="text-warning">Out of Stock Reports: {reports.out}</span>
+            <span class="text-warning">Out of Stock Reports: {this.state.out}</span>
             <br/>
             <span className={ratio > 0.5 ? "text-success" : "text-danger"}> 
               {(ratio * 100).toFixed(1)}%
@@ -169,12 +242,16 @@ class ItemWidget extends React.Component {
 class GroceryInterface extends React.Component {
   constructor(props){
     super(props);
-    this.state = {searchVal: ''}
+
+    this.state = {
+      searchVal: '',
+      images: []
+    }
   }
   
   getItems() { //location of the place is in this.props.selected.geometry
     //get list of items from database instead of returning placeholder
-    const egg_url = "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg";
+    /*const egg_url = "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg";
     const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
     return [
       {name: 'itm1', src: egg_url}, 
@@ -184,7 +261,35 @@ class GroceryInterface extends React.Component {
       {name: 'itm5', src: egg_url},
       {name: 'itm4', src: egg_url},
       {name: 'itm6', src: egg_url}
-    ];
+    ];*/
+    const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
+    const storesRef = firebase.database().ref('stores')
+  
+    storesRef.on('value', snap => {
+      let stores = snap.val();
+      let itemImagePairs = [];
+      for(let store in stores){
+        if(this.props.location.lat === stores[store].lat && this.props.location.lng === stores[store].long){
+          console.log("store is: " + stores[store].name);
+          let items = stores[store].items;
+          
+          for(let item in items){
+            let i = {
+              name: item,
+              src: itemIcons.hasOwnProperty(item) ? itemIcons[item] : "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg"
+            }
+            itemImagePairs.push(i);
+          }
+
+          if(Object.keys(this.state.images).length != Object.keys(itemImagePairs).length){
+            console.log("not the same!");
+            this.setState({
+              images : itemImagePairs
+            });
+          } 
+        }
+      }
+    });
   }
 
   handleChange(e) {
@@ -193,7 +298,8 @@ class GroceryInterface extends React.Component {
   }
 
   render() {
-    var widgets = this.getItems().map(desc => {
+    this.getItems();
+    var widgets = this.state.images.map(desc => {
       return (desc.name.includes(this.state.searchVal) ?
       <ItemWidget 
         key={desc.name}
@@ -364,42 +470,42 @@ function LoadLocation(newName, latitude, longitude, storeType){
   console.log("LAT: " + latitude);
 
   const itemsRef = firebase.database().ref('stores') 
-  itemsRef.on('value', snap => {
+  itemsRef.once('value', snap => {
+
     let items = snap.val();
+
+    
     let newState = [];
     for(let item in items) {
       if(items[item].lat === latitude && items[item].long === longitude){
-        console.log("already in db!");
+        //console.log("already in db!");
         return;
       }
     }
 
-    var itemData;
-    console.log("not in db yet");
+    let itemData;
+    //console.log("not in db yet");
     for (let items in storeType){
-    
     if(storeType[items].includes("grocery")){
-      
       itemData = {
         eggs: -1,
         milk: -1,
+        rice: -1
       }
       break;
     } 
     else if (storeType[items].includes("restaurant")){
       itemData = {
         open: -1,
-      } 
+      }
       break;
     }
     else {
-      itemData = {
-        noItems: 0,
-      } 
+      
     }
   }
 
-  var postData = {
+  let postData = {
     name: newName,
     lat: latitude,
     long: longitude,
