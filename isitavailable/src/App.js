@@ -61,6 +61,67 @@ class Map extends React.Component {
     }
 }
 
+class RestaurantInterface extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  handleCrowdedReport(status) { // 0 = not crowded, 1 = somewhat crowded, 2 = crowded
+    alert("crowdedness report with status " + status);
+  }
+
+  handleWaitTimeReport(time) {
+    alert("wait time report with time " + time);
+  }
+
+  getActivityReports() { //use this.props.location to fetch from database - return average value of reports using int system above ^^^ (from last [x] hours)
+    return 1.5;
+  }
+
+  getReportedWaitTime() { //return average wait time in minutes from last 3 hours
+    return 5;
+  }
+
+  render() {
+    const reportedLevel = this.getActivityReports();
+    var cheeseWheel; //not my idea
+    var textColor;
+
+    if(reportedLevel < 0.66){
+      cheeseWheel = "Low";
+      textColor = "text-success";
+    }
+    else if(reportedLevel < 1.33){
+      cheeseWheel = "Moderate";
+      textColor = "text-warning";
+    }
+    else {
+      cheeseWheel = "High";
+      textColor = "text-danger";
+    }
+
+    return (
+      <div>
+        <h2>Reported Activity Level: <span className={textColor}>{cheeseWheel}</span></h2>
+        <p>Wait time (approx.): {this.getReportedWaitTime()} mins</p> 
+        <br/>
+        <p>Report activity level:</p>
+        <Button block variant="success" className = "mb-1" onClick={() => this.handleCrowdedReport(0)}>Not Crowded</Button>
+        <Button block variant="warning" className = "mb-1" onClick={() => this.handleCrowdedReport(1)}>Somewhat Crowded</Button>
+        <Button block variant="danger" className = "mb-1" onClick={() => this.handleCrowdedReport(2)}>Very Crowded</Button>
+        <br/>
+        <form name="waitTimeForm">
+          <div className="form-group w-50">
+            <label>Report on approximate wait time (minutes):</label>
+            <input max="180" name="waitTime" type="number" class="form-control" id="waitTime"/>
+          </div>
+            <Button variant="info" onClick={() => this.handleWaitTimeReport(Math.min(180, document.forms["waitTimeForm"]["waitTime"].value))}>Submit</Button>
+        </form>
+      </div>
+    );
+  }
+}
+
 class ItemWidget extends React.Component {
   constructor(props){
     super(props);
@@ -80,22 +141,22 @@ class ItemWidget extends React.Component {
     const reports = this.getReports();
     const ratio = reports.in/(reports.in + reports.out);
     return (
-      <div class="container mb-4">
-        <div class="row row-cols-3">
-          <div class="col">
-            <img class="w-100" src={this.props.src}/>
-            <p class="text-center text-info">{this.props.itemName}</p>
+      <div className="container mb-4">
+        <div className="row row-cols-3">
+          <div className="col text-center">
+            <img id="itemImage" src={this.props.src}/>
+            <p className="text-center text-white">{this.props.itemName}</p>
           </div>
-          <div class="col">
-            <Button block variant="success" class = "mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
+          <div className="col">
+            <Button block variant="success" className = "mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
             <Button block variant="danger" onClick={() => this.handleStockChange(false)}>Out of Stock</Button>
           </div>
-          <div class="col text-center">
-            <span class="text-warning">In stock: {reports.in}</span>
+          <div className="col text-center">
+            <span className="text-warning">In Stock Reports: {reports.in}</span>
             <br/>
-            <span class="text-warning">Out of Stock: {reports.out}</span>
+            <span className="text-warning">Out of Stock Reports: {reports.out}</span>
             <br/>
-            <span class={ratio > 0.5 ? "text-success" : "text-danger"}> 
+            <span className={ratio > 0.5 ? "text-success" : "text-danger"}> 
               {(ratio * 100).toFixed(1)}%
             </span>
           </div>
@@ -105,11 +166,12 @@ class ItemWidget extends React.Component {
   }
 }
 
-class Sidebar extends React.Component {
+class GroceryInterface extends React.Component {
   constructor(props){
     super(props);
+    this.state = {searchVal: ''}
   }
-
+  
   getItems() { //location of the place is in this.props.selected.geometry
     //get list of items from database instead of returning placeholder
     const egg_url = "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg";
@@ -118,20 +180,62 @@ class Sidebar extends React.Component {
       {name: 'itm1', src: egg_url}, 
       {name: 'itm2', src: egg_url},
       {name: 'pineapple apple pen', src: pineapple_url}, 
-      {name: 'itm4', src: egg_url}
+      {name: 'itm3', src: egg_url},
+      {name: 'itm5', src: egg_url},
+      {name: 'itm4', src: egg_url},
+      {name: 'itm6', src: egg_url}
     ];
   }
 
-  render () { 
+  handleChange(e) {
+    console.log(e.target.value);
+    this.setState({searchVal: e.target.value});
+  }
+
+  render() {
     return (
-      <Menu disableAutoFocus right isOpen={this.props.isOpen} onStateChange={this.props.osc} width={'45%'}> 
-        <p>{this.props.selected.name}</p>
-        {this.getItems().map(desc => 
+      <div>
+      <Combobox aria-labelledby="searchbox">
+        <ComboboxInput id="filterInput" onChange={e => this.handleChange(e)} placeholder="Filter items..."/>
+      </Combobox>
+      <br/> <br/>
+      {this.getItems().map(desc => {
+        return (desc.name.includes(this.state.searchVal) ?
         <ItemWidget 
-          location={this.props.selected.geometry.location} 
+          key={desc.name}
+          location={this.props.location} 
           itemName={desc.name}
           src={desc.src}
-        />)}
+        /> : null)
+      })}
+      </div>
+    );
+  }
+}
+class Sidebar extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render() { 
+    var content;
+    switch(this.props.selected.typeShort) {
+      case 'G':
+        //console.log("chungus!!!!!!!!!1")
+        content =
+          <GroceryInterface
+            location = {this.props.selected.geometry.location}/>;
+        break;
+      case 'R':
+        content = 
+        <RestaurantInterface
+          location = {this.props.selected.geometry.location}/>;
+    }
+    return (
+      <Menu disableAutoFocus right isOpen={this.props.isOpen} onStateChange={this.props.osc} width={'45%'}> 
+        <h1 id="POIHeader">{this.props.selected.name}</h1>
+        <br/>
+        {content}
       </Menu>
     );
   }
@@ -196,7 +300,9 @@ export default function App() {
             });
             marker.addListener('click', (event) => {
               LoadLocation(results.results[i].name, results.results[i].geometry.location.lat, results.results[i].geometry.location.lng, results.results[i].types);
+              results.results[i].typeShort = iconName;
               setPOI(results.results[i]);
+              //console.log(results.results[i])
               setOpen(true);
             });
             markers.push(marker);

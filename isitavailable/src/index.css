@@ -36,6 +36,28 @@ code {
   z-index: 10;
 }
 
+@media (max-width: 1200px) {
+  #itemImage {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1200px) {
+  #itemImage {
+    width: 50%;
+  }
+}
+
+#POIHeader {
+  outline: 0;
+  color: white;
+}
+
+#filterInput{
+  outline: 0;
+  border-radius: 0.25rem;
+  border: 1px solid #ffffff;
+}
 /* Position and sizing of burger button */
 /* .bm-burger-button {
   position: fixed;
