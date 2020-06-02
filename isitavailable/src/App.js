@@ -24,7 +24,7 @@ import mapTheme from "./mapTheme.js"
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
 
-
+var markers = [];
 const libraries = ["places"];
 const mapContainerStyles = {
   width: "100vw",
@@ -71,7 +71,7 @@ export default function App() {
       loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
     }, []);
 
-    var markers = [];
+    
 
     const smoothZoom = (current, end) => {
       console.log("starting from", current);
@@ -122,10 +122,8 @@ export default function App() {
         .catch((error) => {
           console.error(error)
         })
-      }
-      
+      } 
     }
-
     const pan = React.useCallback(({lat, lng}) => {
       console.log({lat, lng});
       mapRef.panTo({lat, lng});
@@ -177,9 +175,9 @@ function LoadLocation(newName, latitude, longitude, storeType){
 
     var itemData;
     console.log("not in db yet");
-    for (let items in storeType){
+    for (let types in storeType){
     
-    if(storeType[items].includes("grocery")){
+    if(storeType[types].includes("grocery")){
       
       itemData = {
         eggs: -1,
@@ -187,7 +185,7 @@ function LoadLocation(newName, latitude, longitude, storeType){
       }
       break;
     } 
-    else if (storeType[items].includes("restaurant")){
+    else if (storeType[types].includes("restaurant")){
       itemData = {
         open: -1,
       } 
@@ -216,8 +214,6 @@ function LoadLocation(newName, latitude, longitude, storeType){
 
   });
   
-
-  
 }
 
 
@@ -238,7 +234,7 @@ function Search({ pan }) {
   const handleInput = (e) => {
     setValue(e.target.value);
   };
- 
+
   const handleSelect = (description) => {
     setValue(description, false);
     clearSuggestions();
@@ -300,10 +296,32 @@ class ItemSearch extends Component{
   render(){
     const handleInput = (e) => {
     };
-    const handleSelect = () => {
-      console.log("selected");
-
-      //remove markers 
+    const handleSelect = (item) => {
+      console.log("selected: " + markers[0].position + item);
+      const storesRef = firebase.database().ref('stores') 
+      storesRef.once('value', snap => {
+        let stores = snap.val();
+          let found = false;
+          for(let marker in markers){
+            found = false;
+            for(let store in stores){
+              if(markers[marker].position.lat() === stores[store].lat && markers[marker].position.lng() === stores[store].long){
+                console.log("found something");
+                let itemz = Object.keys(stores[store].items);
+                for(let inventoryItem in itemz){
+                  
+                  if(item === itemz[inventoryItem]){
+                    found = true;
+                    console.log("ye");
+                  }
+                }
+              } 
+            }
+            if(!found){
+              markers[marker].setMap(null);
+            }
+          }
+      });
     };
     return (
       <div className = "search2">
