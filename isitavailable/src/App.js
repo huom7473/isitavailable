@@ -165,12 +165,7 @@ class RestaurantInterface extends React.Component {
           crowdCount: crowdAvg
         });
       }
-      return;
-      //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
     });
-    
-    
-    //return 1.5;
   }
 
   getReportedWaitTime() { //return average wait time in minutes from last 3 hours
@@ -205,7 +200,7 @@ class RestaurantInterface extends React.Component {
           waitCount: waitAvg
         });
       }
-      return;
+      
     });
   }
 
@@ -224,13 +219,13 @@ class RestaurantInterface extends React.Component {
       cheeseWheel = "Moderate";
       textColor = "text-warning";
     }
-    else if (reportedLevel > 9999){
-      cheeseWheel = "Unknown";
-      textColor = "text-warning";
-    }
-    else {
+    else if (reportedLevel <= 2.0){
       cheeseWheel = "High";
       textColor = "text-danger";
+    }
+    else { //reportedLevel NaN
+      cheeseWheel = "Unknown";
+      textColor = "text-white";
     }
 
     let waitStatus = (this.state.waitCount === -1 || this.state.waitCount > 9999) ? "unknown" : this.state.waitCount + " mins"; 
@@ -336,7 +331,7 @@ class ItemWidget extends React.Component {
           out: outCount
         });
       }
-      return;
+      
       //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
     });
   }
@@ -588,7 +583,7 @@ export default function App() {
 
 function LoadLocation(newName, latitude, longitude, storeType){
   
-  console.log("LAT: " + latitude);
+  //console.log("LAT: " + latitude);
   let isGrocery = false;
   const itemsRef = firebase.database().ref('stores') 
   itemsRef.once('value', snap => {
@@ -633,7 +628,7 @@ function LoadLocation(newName, latitude, longitude, storeType){
     firebase.database().ref().child('/stores/' + newPostKey + '/items').set(itemData);
   }
   console.log("exiting loadlocation function");
-  //return;
+  //
 
   });
   
