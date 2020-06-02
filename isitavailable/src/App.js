@@ -75,7 +75,7 @@ class RestaurantInterface extends React.Component {
   }
 
   handleCrowdedReport(status) { // 0 = not crowded, 1 = somewhat crowded, 2 = crowded
-    alert("crowdedness report with status " + status);
+    //alert("crowdedness report with status " + status);
 
     const storesRef = firebase.database().ref('stores');
     storesRef.once('value', snap => {
@@ -206,10 +206,7 @@ class RestaurantInterface extends React.Component {
         });
       }
       return;
-      //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
     });
-    
-    //return 5;
   }
 
   render() {
@@ -347,6 +344,10 @@ class ItemWidget extends React.Component {
   render() {
     this.getReports();
     const ratio = this.state.in/(this.state.in + this.state.out);
+    const displayedRatio = (this.state.in + this.state.out) === 0 ?  <span className="text-white">N/A</span> :
+      (<span className={ratio > 0.5 ? "text-success" : "text-danger"}> 
+      {(ratio * 100).toFixed(1)}%
+      </span>)
     return (
       <div className="container mb-4">
         <div className="row row-cols-3">
@@ -358,14 +359,12 @@ class ItemWidget extends React.Component {
             <Button block variant="success" className = "mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
             <Button block variant="danger" onClick={() => this.handleStockChange(false)}>Out of Stock</Button>
           </div>
-          <div class="col text-center">
-            <span class="text-warning">In stock Reports: {this.state.in}</span>
+          <div className="col text-center">
+            <span className="text-warning">In stock Reports: {this.state.in}</span>
             <br/>
-            <span class="text-warning">Out of Stock Reports: {this.state.out}</span>
+            <span className="text-warning">Out of Stock Reports: {this.state.out}</span>
             <br/>
-            <span className={ratio > 0.5 ? "text-success" : "text-danger"}> 
-              {(ratio * 100).toFixed(1)}%
-            </span>
+            {displayedRatio}
           </div>
         </div>
       </div>
@@ -384,18 +383,6 @@ class GroceryInterface extends React.Component {
   }
   
   getItems() { //location of the place is in this.props.selected.geometry
-    //get list of items from database instead of returning placeholder
-    /*const egg_url = "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg";
-    const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
-    return [
-      {name: 'itm1', src: egg_url}, 
-      {name: 'itm2', src: egg_url},
-      {name: 'pineapple apple pen', src: pineapple_url}, 
-      {name: 'itm3', src: egg_url},
-      {name: 'itm5', src: egg_url},
-      {name: 'itm4', src: egg_url},
-      {name: 'itm6', src: egg_url}
-    ];*/
     const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
     const storesRef = firebase.database().ref('stores')
   
@@ -404,7 +391,7 @@ class GroceryInterface extends React.Component {
       let itemImagePairs = [];
       for(let store in stores){
         if(this.props.location.lat === stores[store].lat && this.props.location.lng === stores[store].long){
-          console.log("store is: " + stores[store].name);
+          //console.log("store is: " + stores[store].name);
           let items = stores[store].items;
           
           for(let item in items){
@@ -416,7 +403,7 @@ class GroceryInterface extends React.Component {
           }
 
           if(Object.keys(this.state.images).length != Object.keys(itemImagePairs).length){
-            console.log("not the same!");
+            //console.log("not the same!");
             this.setState({
               images : itemImagePairs
             });
