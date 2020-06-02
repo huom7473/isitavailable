@@ -256,6 +256,8 @@ export default function App() {
 
     const [open, setOpen] = React.useState(false);
     const [selectedPOI, setPOI] = React.useState(null);
+    const [POIsLoading, setPOISLoading] = React.useState(false);
+
     const smoothZoom = (current, end) => {
       //console.log("starting from", current);
       while (current < end) {
@@ -275,9 +277,11 @@ export default function App() {
       markers = [];
     }, [])
 
-    const loadMarkers = (keypairs) => {
+    const loadMarkers = React.useCallback((keypairs) => {
       const center = mapRef.getCenter();
       const proxyurl = "https://cors-anywhere.herokuapp.com/";
+      setPOISLoading(true);
+
       for(let i = 0; i < keypairs.length; i++) { //handles multiple keywords
         const keyword = keypairs[i].keyword;
         const iconName = keypairs[i].iconName;
@@ -308,12 +312,17 @@ export default function App() {
             markers.push(marker);
           }
         })
+        .then(() => {
+          if(i === keypairs.length - 1) { //only set the loading state of the button to false after last iteration
+            setPOISLoading(false);
+          }
+        })
         .catch((error) => {
           console.error(error)
         })
       }
       
-    }
+    }, [])
 
     const pan = React.useCallback(({lat, lng}) => {
       //console.log({lat, lng});
@@ -328,7 +337,17 @@ export default function App() {
     return (
       <div>
         {selectedPOI && <Sidebar isOpen={open} osc={state => setOpen(state.isOpen)} selected={selectedPOI}/>}
-        <Button variant="danger" className="removeButton" onClick={removeMarkers}>Clear POIs</Button>
+        <span className="POIManagement">
+          <Button 
+            variant="info" 
+            className="mr-2" 
+            onClick={() => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}])}
+            disabled={POIsLoading}
+            >
+              {POIsLoading ? 'Loading...' : 'Load Nearby POIs'}
+            </Button>
+          <Button variant="danger" onClick={removeMarkers}>Clear POIs</Button>
+        </span>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
       </div>

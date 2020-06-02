@@ -28,7 +28,7 @@ code {
   width: 100%;
 }
 
-.removeButton {
+.POIManagement {
   position: absolute;
   bottom: 20px;
   right: 20px;
@@ -53,7 +53,7 @@ code {
   color: white;
 }
 
-#filterInput{
+#filterInput {
   outline: 0;
   border-radius: 0.25rem;
   border: 1px solid #ffffff;
