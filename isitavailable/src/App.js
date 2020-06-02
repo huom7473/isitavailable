@@ -67,26 +67,155 @@ class Map extends React.Component {
 class RestaurantInterface extends React.Component {
   constructor(props){
     super(props);
+    this.state ={
+      changed : false,
+      crowdCount: -1,
+      waitCount : -1
+    };
   }
 
   handleCrowdedReport(status) { // 0 = not crowded, 1 = somewhat crowded, 2 = crowded
     alert("crowdedness report with status " + status);
+
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let stores = snap.val();
+      let d = new Date();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+
+          let crowdReport = {
+            status: status,
+            time: d.toString()
+          };
+  
+          var newPostKey = firebase.database().ref().push().key;
+          firebase.database().ref().child('/stores/' + store + '/crowdedness/' + newPostKey).set(crowdReport);
+          this.setState({
+            changed: !this.state.changed
+          });
+          break;
+        }
+      }
+    });
+
+
   }
 
   handleWaitTimeReport(time) {
-    alert("wait time report with time " + time);
+    //alert("wait time report with time " + time);
+    
+    if(time < 0){
+      alert("Please enter a valid number.");
+      return;
+    }
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let stores = snap.val();
+      let d = new Date();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+
+          let waitReport = {
+            waitTime: time,
+            time: d.toString()
+          };
+          var newPostKey = firebase.database().ref().push().key;
+          firebase.database().ref().child('/stores/' + store + '/waittime/' + newPostKey).set(waitReport);
+          this.setState({
+            changed: !this.state.changed
+          });
+          break;
+        }
+      }
+    });
+
   }
 
   getActivityReports() { //use this.props.location to fetch from database - return average value of reports using int system above ^^^ (from last [x] hours)
-    return 1.5;
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let crowdCount = 0;
+      let counter = 0;
+      let stores = snap.val();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+          let items = stores[store].crowdedness;
+          for(let reports in items){
+            let dt = new Date(items[reports].time);
+            let dtn = new Date();
+            let diff = (dtn.getTime() - dt.getTime())/3600000;
+            //console.log("diff in time: " + diff);
+            if(diff >= 3.0){
+              const ref = firebase.database().ref('stores/' + store + '/crowdedness/' + reports);
+              ref.remove();
+            }
+            crowdCount += items[reports].status;
+            counter++;
+          }
+        }
+      }
+      //this code instead of checking if counter == 0 in the final if statement to allow the component to re-render if there are no items in the db
+      let crowdAvg = crowdCount/counter;
+      if(Number.isNaN(crowdAvg)){
+        crowdAvg = 10000;
+      } 
+      if(crowdAvg != this.state.crowdCount){
+        this.setState({
+          crowdCount: crowdAvg
+        });
+      }
+      return;
+      //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
+    });
+    
+    
+    //return 1.5;
   }
 
   getReportedWaitTime() { //return average wait time in minutes from last 3 hours
-    return 5;
+    const storesRef = firebase.database().ref('stores');
+    storesRef.once('value', snap => {
+      let waitCount = 0;
+      let counter = 0;
+      let stores = snap.val();
+      for(let store in stores){
+        if(stores[store].lat === this.props.location.lat && stores[store].long === this.props.location.lng){
+          let items = stores[store].waittime;
+          for(let reports in items){
+            let dt = new Date(items[reports].time);
+            let dtn = new Date();
+            let diff = (dtn.getTime() - dt.getTime())/3600000;
+            //console.log("diff in time: " + diff);
+            if(diff >= 3.0){
+              const ref = firebase.database().ref('stores/' + store + '/waittime/' + reports);
+              ref.remove();
+            }
+            waitCount += items[reports].waitTime;
+            counter++;
+          }
+        }
+      }
+      let waitAvg = Math.floor(waitCount/counter);
+      if(Number.isNaN(waitAvg)){
+        waitAvg = 10000;
+      } 
+      if(waitAvg != this.state.waitCount){
+        this.setState({
+          waitCount: waitAvg
+        });
+      }
+      return;
+      //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
+    });
+    
+    //return 5;
   }
 
   render() {
-    const reportedLevel = this.getActivityReports();
+    this.getActivityReports();
+    this.getReportedWaitTime();
+    const reportedLevel = this.state.crowdCount;
     var cheeseWheel; //not my idea
     var textColor;
 
@@ -98,15 +227,20 @@ class RestaurantInterface extends React.Component {
       cheeseWheel = "Moderate";
       textColor = "text-warning";
     }
+    else if (reportedLevel > 9999){
+      cheeseWheel = "Unknown";
+      textColor = "text-warning";
+    }
     else {
       cheeseWheel = "High";
       textColor = "text-danger";
     }
 
+    let waitStatus = (this.state.waitCount === -1 || this.state.waitCount > 9999) ? "unknown" : this.state.waitCount + " mins"; 
     return (
       <div>
         <h2>Reported Activity Level: <span className={textColor}>{cheeseWheel}</span></h2>
-        <p>Wait time (approx.): {this.getReportedWaitTime()} mins</p> 
+        <p>Wait time (approx.): {waitStatus}</p> 
         <br/>
         <p>Report activity level:</p>
         <Button block variant="success" className = "mb-1" onClick={() => this.handleCrowdedReport(0)}>Not Crowded</Button>
@@ -468,7 +602,7 @@ export default function App() {
 function LoadLocation(newName, latitude, longitude, storeType){
   
   console.log("LAT: " + latitude);
-
+  let isGrocery = false;
   const itemsRef = firebase.database().ref('stores') 
   itemsRef.once('value', snap => {
 
@@ -492,17 +626,10 @@ function LoadLocation(newName, latitude, longitude, storeType){
         milk: -1,
         rice: -1
       }
+      isGrocery = true;
       break;
     } 
-    else if (storeType[items].includes("restaurant")){
-      itemData = {
-        open: -1,
-      }
-      break;
-    }
-    else {
-      
-    }
+    
   }
 
   let postData = {
@@ -515,9 +642,11 @@ function LoadLocation(newName, latitude, longitude, storeType){
 
   console.log("writing to db");
   firebase.database().ref().child('/stores/' + newPostKey).set(postData);
-  firebase.database().ref().child('/stores/' + newPostKey + '/items').set(itemData);
+  if(isGrocery){
+    firebase.database().ref().child('/stores/' + newPostKey + '/items').set(itemData);
+  }
   console.log("exiting loadlocation function");
-  return;
+  //return;
 
   });
   
