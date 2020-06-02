@@ -1,5 +1,7 @@
 import React from "react";
 import firebase from './firebase.js'
+import Button from 'react-bootstrap/Button'
+import { slide as Menu } from 'react-burger-menu'
 import {
   GoogleMap,
   useLoadScript,
@@ -19,7 +21,7 @@ import {
 } from "@reach/combobox";
 
 import "@reach/combobox/styles.css";
-
+import 'bootstrap/dist/css/bootstrap.css';
 import mapTheme from "./mapTheme.js"
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
@@ -36,6 +38,8 @@ const options = {
   disableDefaultUI: true,
   clickableIcons: false
 }
+
+var markers = [];
 
 class Map extends React.Component {
   constructor(props){
@@ -57,6 +61,82 @@ class Map extends React.Component {
     }
 }
 
+class ItemWidget extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  handleStockChange(status) { //use location prop (this.props.location)
+    alert(status ? "in stock request for " + this.props.itemName : "out of stock request for " + this.props.itemName);
+    //update database with new stock status instead of alerting
+  }
+
+  getReports() { //get # of reports with status {status} from past three hours
+    //possibly also delete entries that are too old
+    return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
+  }
+
+  render() {
+    const reports = this.getReports();
+    const ratio = reports.in/(reports.in + reports.out);
+    return (
+      <div class="container mb-4">
+        <div class="row row-cols-3">
+          <div class="col">
+            <img class="w-100" src={this.props.src}/>
+            <p class="text-center text-info">{this.props.itemName}</p>
+          </div>
+          <div class="col">
+            <Button block variant="success" class = "mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
+            <Button block variant="danger" onClick={() => this.handleStockChange(false)}>Out of Stock</Button>
+          </div>
+          <div class="col text-center">
+            <span class="text-warning">In stock: {reports.in}</span>
+            <br/>
+            <span class="text-warning">Out of Stock: {reports.out}</span>
+            <br/>
+            <span class={ratio > 0.5 ? "text-success" : "text-danger"}> 
+              {(ratio * 100).toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+class Sidebar extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  getItems() { //location of the place is in this.props.selected.geometry
+    //get list of items from database instead of returning placeholder
+    const egg_url = "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg";
+    const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
+    return [
+      {name: 'itm1', src: egg_url}, 
+      {name: 'itm2', src: egg_url},
+      {name: 'pineapple apple pen', src: pineapple_url}, 
+      {name: 'itm4', src: egg_url}
+    ];
+  }
+
+  render () { 
+    return (
+      <Menu disableAutoFocus right isOpen={this.props.isOpen} onStateChange={this.props.osc} width={'45%'}> 
+        <p>{this.props.selected.name}</p>
+        {this.getItems().map(desc => 
+        <ItemWidget 
+          location={this.props.selected.geometry.location} 
+          itemName={desc.name}
+          src={desc.src}
+        />)}
+      </Menu>
+    );
+  }
+}
+
 export default function App() {
    
     const {isLoaded, loadError} = useLoadScript({
@@ -70,13 +150,13 @@ export default function App() {
       loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
     }, []);
 
-    var markers = [];
-
+    const [open, setOpen] = React.useState(false);
+    const [selectedPOI, setPOI] = React.useState(null);
     const smoothZoom = (current, end) => {
-      console.log("starting from", current);
+      //console.log("starting from", current);
       while (current < end) {
         setTimeout(() => {
-          console.log("setting zoom to", current + 1);
+          //console.log("setting zoom to", current + 1);
           mapRef.setZoom(current + 1);
         }, 1000);
         current++;
@@ -84,7 +164,7 @@ export default function App() {
     }
 
     const removeMarkers = React.useCallback(() => {
-      console.log(markers);
+      //console.log(markers);
       for(let i = 0; i < markers.length; i++){
         markers[i].setMap(null);
       }
@@ -114,7 +194,11 @@ export default function App() {
                 origin: new window.google.maps.Point(0,0),
                 anchor: new window.google.maps.Point(20, 20)}
             });
-            marker.addListener('click', (event) => LoadLocation(results.results[i].name, results.results[i].geometry.location.lat, results.results[i].geometry.location.lng, results.results[i].types));
+            marker.addListener('click', (event) => {
+              LoadLocation(results.results[i].name, results.results[i].geometry.location.lat, results.results[i].geometry.location.lng, results.results[i].types);
+              setPOI(results.results[i]);
+              setOpen(true);
+            });
             markers.push(marker);
           }
         })
@@ -126,7 +210,7 @@ export default function App() {
     }
 
     const pan = React.useCallback(({lat, lng}) => {
-      console.log({lat, lng});
+      //console.log({lat, lng});
       mapRef.panTo({lat, lng});
       smoothZoom(mapRef.getZoom(), defaultZoom);
       loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
@@ -137,7 +221,8 @@ export default function App() {
 
     return (
       <div>
-        <button className="removeButton" onClick={removeMarkers}>Clear POIs</button>
+        {selectedPOI && <Sidebar isOpen={open} osc={state => setOpen(state.isOpen)} selected={selectedPOI}/>}
+        <Button variant="danger" className="removeButton" onClick={removeMarkers}>Clear POIs</Button>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
       </div>
@@ -145,7 +230,7 @@ export default function App() {
 }
 
 function LoadLocation(newName, latitude, longitude, storeType){
-
+  
   console.log("LAT: " + latitude);
 
   const itemsRef = firebase.database().ref('stores') 
@@ -243,7 +328,7 @@ function Search({ pan }) {
   }
 
   return (
-    <div className = "search">
+    <div className = "search1">
       <Combobox onSelect={handleSelect} aria-labelledby="searchbox" onKeyPress={handleKeyPress}>
         <ComboboxInput value={value} onChange={handleInput} disabled={!ready} placeholder="Search for a place..."/>
         <ComboboxPopover>
