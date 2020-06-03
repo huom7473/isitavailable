@@ -5,8 +5,10 @@ import mapTheme from "./mapTheme.js";
 const mapContainerStyles = {
     width: "100vw",
     height: "100vh",
-  };
+};
+
 const defaultCenter = {lat : 34.069, lng: -118.445};
+
 export const defaultZoom = 15.5;
 const options = {
     styles: mapTheme,

@@ -23,7 +23,19 @@ export default function App() {
     let mapRef;
     const onLoad = React.useCallback((map) => {
       mapRef = map;
-      loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
+      let startLat, startLng;
+      if("geolocation" in navigator){
+        navigator.geolocation.getCurrentPosition(position => {
+          startLat = position.coords.latitude;
+          startLng = position.coords.longitude;
+          //console.log(startLat + ' '+ startLng);
+          pan({lat: startLat, lng: startLng});
+        }, () => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}])
+      )}
+      else {
+        loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
+      }
+
     }, []);
 
     const [open, setOpen] = React.useState(false);
@@ -57,6 +69,7 @@ export default function App() {
       for(let i = 0; i < keypairs.length; i++) { //handles multiple keywords
         const keyword = keypairs[i].keyword;
         const iconName = keypairs[i].iconName;
+        //console.log('load markers call:' + center.lat()+' '+center.lng());
         fetch(proxyurl+
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key="
         +process.env.REACT_APP_GOOGLE_MAPS_API_KEY+
@@ -98,10 +111,10 @@ export default function App() {
     }, [])
 
     const pan = React.useCallback(({lat, lng}) => {
-      //console.log({lat, lng});
       mapRef.panTo({lat, lng});
       smoothZoom(mapRef.getZoom(), defaultZoom);
-      loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
+      //console.log(mapRef.getCenter().lat() + ' ' + mapRef.getCenter().lng());
+      setTimeout(() => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]), 100);
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
