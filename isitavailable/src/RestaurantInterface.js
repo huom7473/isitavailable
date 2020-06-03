@@ -1,16 +1,19 @@
 import React from "react";
 import firebase from './firebase.js';
 import Button from 'react-bootstrap/Button';
+import Alert from "react-bootstrap/Alert";
 export class RestaurantInterface extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       changed: false,
       crowdCount: -1,
-      waitCount: -1
+      waitCount: -1,
+      showAlert: false
     };
   }
   handleCrowdedReport(status) {
+    this.setState({showAlert: true});
     //alert("crowdedness report with status " + status);
     const storesRef = firebase.database().ref('stores');
     storesRef.once('value', snap => {
@@ -33,6 +36,7 @@ export class RestaurantInterface extends React.Component {
     });
   }
   handleWaitTimeReport(time) {
+    this.setState({showAlert: true});
     //alert("wait time report with time " + time);
     if (time < 0) {
       alert("Please enter a valid number.");
@@ -151,6 +155,7 @@ export class RestaurantInterface extends React.Component {
     }
     let waitStatus = (this.state.waitCount === -1 || this.state.waitCount > 9999) ? "unknown" : this.state.waitCount + " mins";
     return (<div>
+      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
       <h2>Reported Activity Level: <span className={textColor}>{cheeseWheel}</span></h2>
       <p>Wait time (approx.): {waitStatus}</p>
       <br />

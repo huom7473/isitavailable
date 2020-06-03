@@ -36,6 +36,18 @@ code {
   z-index: 10;
 }
 
+.close {
+  outline: 0 !important;
+}
+
+#successMessage {
+  position: absolute;
+  top: 20px;
+  right: 40%;
+  outline: 0;
+  margin: auto;
+}
+
 @media (max-width: 1200px) {
   #itemImage {
     width: 100%;

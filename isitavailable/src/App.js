@@ -13,7 +13,6 @@ const icons = {"R": "restaurant.svg", "G": "grocery.png"};
 const libraries = ["places"];
 
 export default function App() {
-   
     const {isLoaded, loadError} = useLoadScript({
       googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
       libraries: libraries
@@ -62,7 +61,7 @@ export default function App() {
         "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key="
         +process.env.REACT_APP_GOOGLE_MAPS_API_KEY+
         "&location="+center.lat() + "," + center.lng()+
-        "&radius=10000&keyword="+keyword)
+        "&keyword="+keyword+"&rankby=distance")
         .then(response => response.json())
         .then(results => {
           for(let i = 0; i < results.results.length; i++){

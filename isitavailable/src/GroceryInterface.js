@@ -19,7 +19,6 @@ export class GroceryInterface extends React.Component {
     };
   }
   getItems() {
-    const pineapple_url = "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg";
     const storesRef = firebase.database().ref('stores');
     storesRef.on('value', snap => {
       let stores = snap.val();

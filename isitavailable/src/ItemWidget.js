@@ -1,13 +1,15 @@
 import React from "react";
 import firebase from './firebase.js';
 import Button from 'react-bootstrap/Button';
+import Alert from "react-bootstrap/Alert";
 export class ItemWidget extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       changed: false,
       in: 0,
-      out: 0
+      out: 0,
+      showAlert: false
     };
   }
   handleStockChange(status) {
@@ -32,6 +34,7 @@ export class ItemWidget extends React.Component {
         }
       }
     });
+    this.setState({showAlert: true});
     //update database with new stock status instead of alerting
   }
   getReports() {
@@ -82,7 +85,9 @@ export class ItemWidget extends React.Component {
       (<span className={ratio > 0.5 ? "text-success" : "text-danger"}>
         {(ratio * 100).toFixed(1)}%
       </span>);
-    return (<div className="container mb-4">
+    return (
+    <div className="container mb-4">
+      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
       <div className="row row-cols-3">
         <div className="col text-center">
           <img id="itemImage" src={this.props.src} />
