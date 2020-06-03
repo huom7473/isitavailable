@@ -3,13 +3,6 @@ import firebase from './firebase.js';
 import { Combobox, ComboboxInput } from "@reach/combobox";
 import { ItemWidget } from "./ItemWidget";
 
-const itemIcons = {"eggs": "https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg", 
-"milk": "https://hq.recyclist.co/wp-content/uploads/2015/02/milkgallon-300x300.jpg", "rice" : "https://d2d8wwwkmhfcva.cloudfront.net/800x/d2lnr5mha7bycj.cloudfront.net/product-image/file/large_7e52a534-621e-4aea-b085-845b5f5e2c01.jpg",
-"flour": "https://nuts.com/images/rackcdn/ed910ae2d60f0d25bcb8-80550f96b5feb12604f4f720bfefb46d.ssl.cf1.rackcdn.com/c08b4a59c098d141-tZqCb-IE-zoom.jpg", "chicken": "https://www.marlerblog.com/uploads/image/chicken_1823798c.jpg",
-"pasta": "https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/6F320FC7-CBD7-419D-B790-24DA25E975F9/Derivates/9774C36E-8478-4BE3-A8CD-FF02AC5B9BCB.jpg", "beans" : "https://images-na.ssl-images-amazon.com/images/I/81jSxkIyr%2BL._SY550_.jpg",
-"water": "https://ik.imagekit.io/ontimesupplies/oppictures/images/180489.JPG?tr=w-1500", "fish": "https://jpg.westernkosher.com/content/images/thumbs/0055127_fresh-fish_300.jpeg", "bread": "https://bakingamoment.com/wp-content/uploads/2020/01/IMG_7173-white-bread-2.jpg"
-}
-
 export class GroceryInterface extends React.Component {
   constructor(props) {
     super(props);

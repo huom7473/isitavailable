@@ -1,4 +1,5 @@
 import "@reach/combobox/styles.css";
+
 import { useLoadScript } from "@react-google-maps/api";
 import 'bootstrap/dist/css/bootstrap.css';
 import React from "react";
@@ -7,10 +8,13 @@ import { LoadLocation } from "./LoadLocation";
 import { Map, defaultZoom } from "./Map";
 import { Search } from "./Search";
 import { Sidebar } from "./Sidebar";
+import { ItemSearch } from "./ItemSearch";
 
 const icons = {"R": "restaurant.svg", "G": "grocery.png"};
 
 const libraries = ["places"];
+var markers = [];
+global.markers = markers;
 
 export default function App() {
     const {isLoaded, loadError} = useLoadScript({
@@ -18,13 +22,12 @@ export default function App() {
       libraries: libraries
     })
 
-    var markers = [];
-    
     let mapRef;
     const onLoad = React.useCallback((map) => {
       mapRef = map;
       let startLat, startLng;
       if("geolocation" in navigator){
+        console.log("geolocating");
         navigator.geolocation.getCurrentPosition(position => {
           startLat = position.coords.latitude;
           startLng = position.coords.longitude;
@@ -35,7 +38,7 @@ export default function App() {
       else {
         loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]);
       }
-
+      
     }, []);
 
     const [open, setOpen] = React.useState(false);
@@ -56,10 +59,20 @@ export default function App() {
     const removeMarkers = React.useCallback(() => {
       //console.log(markers);
       for(let i = 0; i < markers.length; i++){
-        markers[i].setMap(null);
+        global.markers[i].setMap(null);
       }
-      markers = [];
+      global.markers = [];
     }, [])
+
+
+    const tester = () => {
+      //this isn't working rn
+      console.log("resetting markers" + global.markers);
+      for(let i = 0; i < markers.length; i++){
+        global.markers[i].setMap(mapRef);
+
+      }
+    }
 
     const loadMarkers = React.useCallback((keypairs) => {
       const center = mapRef.getCenter();
@@ -95,7 +108,14 @@ export default function App() {
               //console.log(results.results[i])
               setOpen(true);
             });
-            markers.push(marker);
+            global.markers.push(marker);
+            console.log("number of markers: " + Object.keys(global.markers).length);
+            if(Object.keys(global.markers).length === 40 || Object.keys(global.markers).length === 20){
+              for(let val in global.markers){
+                console.log("lat: " + global.markers[val].position.lng());
+              }
+            }
+
           }
         })
         .then(() => {
@@ -133,9 +153,11 @@ export default function App() {
               {POIsLoading ? 'Loading...' : 'Load Nearby POIs'}
             </Button>
           <Button variant="danger" onClick={removeMarkers}>Clear POIs</Button>
+          <Button variant="info" onClick={tester}>Testing Button</Button>
         </span>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
+        <ItemSearch />
       </div>
     );
 }
