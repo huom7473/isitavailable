@@ -30,7 +30,7 @@ export class GroceryInterface extends React.Component {
           for (let item in items) {
             let i = {
               name: item,
-              src: itemIcons.hasOwnProperty(item) ? itemIcons[item] : "https://images-na.ssl-images-amazon.com/images/I/71%2BqAJehpkL._SL1500_.jpg"
+              src: "" + item + ".jpg"
             };
             itemImagePairs.push(i);
           }
