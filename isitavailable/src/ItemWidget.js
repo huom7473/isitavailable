@@ -53,15 +53,24 @@ export class ItemWidget extends React.Component {
                 let dt = new Date(items[item][reports].time);
                 let dtn = new Date();
                 let diff = (dtn.getTime() - dt.getTime()) / 3600000;
-                //console.log("diff in time: " + diff);
-                if (diff >= 3.0) {
+                console.log("diff in time: " + diff);
+                if (diff >= 3) {
+                  console.log("removing this ref!");
                   const ref = firebase.database().ref('stores/' + store + '/items/' + item + '/' + reports);
                   ref.remove();
+                  console.log("ref removed, the length is now " + Object.keys(items[item]).length);
+                  if(Object.keys(items[item]).length === 0){
+                    console.log("should be empty : " + Object.keys(items[item]).length);
+                    var obj = {};
+                    obj[item] = -2;
+                    var hopperRef = firebase.database().ref('stores/' + store + '/items');
+                    hopperRef.update(obj);
+                  }
                 }
                 if (items[item][reports].status === "in_stock") {
                   inCount++;
                 }
-                else {
+                else if (items[item][reports].status === "out_of_stock"){
                   outCount++;
                 }
               }

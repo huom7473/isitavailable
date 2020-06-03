@@ -16,16 +16,16 @@ export function LoadLocation(newName, latitude, longitude, storeType) {
     //console.log("not in db yet");
     if (storeType === 'G') {
       itemData = {
-        eggs: -1,
-        milk: -1,
-        rice: -1,
-        flour: -1,
-        chicken: -1,
-        pasta: -1,
-        water: -1,
-        beans: -1,
-        bread: -1,
-        fish: -1,
+        eggs: {status: 0},
+        milk: {status: 0},
+        rice: {status: 0},
+        flour: {status: 0},
+        chicken: {status: 0},
+        pasta: {status: 0},
+        water: {status: 0},
+        beans: {status: 0},
+        bread: {status: 0},
+        fish: {status: 0},
       };
       isGrocery = true;
     }

@@ -39,28 +39,30 @@ export class ItemSearch extends React.Component{
                 for(let store in stores){
                     if(global.markers[marker].position.lat() === stores[store].lat && global.markers[marker].position.lng() === stores[store].long){
                         inDb = true;
-                        console.log(global.markers[marker].icon.url);
                         let itemz;
                         itemz = stores[store].items;
                         for(let inventoryItem in itemz){
                             if(item === inventoryItem){
                                 let avg;
+                                let inCount = 0;
+                                let outCount = 0;
                                 console.log(stores[store].items[inventoryItem]);
                                 for (let reports in stores[store].items[inventoryItem]){
-                                    let inCount = 0;
-                                    let outCount = 0;
+                                    
                                     if (stores[store].items[inventoryItem][reports].status === "in_stock") {
                                         inCount++;
                                     }
-                                    else {
+                                    else if (stores[store].items[inventoryItem][reports].status === "out_of_stock") {
                                         outCount++;
                                     }
-                                    if(inCount === 0 && outCount === 0){
-                                        avg = -1;
-                                    } else {
-                                        avg = inCount/(inCount+outCount);
-                                    }
                                 }
+                                if(inCount === 0 && outCount === 0){
+                                    avg = -1;
+                                } else {
+                                    console.log("its not -1");
+                                    avg = inCount/(inCount+outCount);
+                                }
+                                console.log("avg is "+ avg);
                                 if(avg > 0.8){
                                     global.markers[marker].icon.url = "grocerygreen.png"
                                 } else if (avg > 0.3){
