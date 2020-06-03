@@ -50,6 +50,10 @@ code {
   outline: 0 !important;
 }
 
+.suggestions {
+  z-index: 10;
+}
+
 #successMessage {
   position: absolute;
   top: 20px;

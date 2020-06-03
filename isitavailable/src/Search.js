@@ -30,7 +30,7 @@ export function Search({ pan }) {
   return (<div className="search1">
     <Combobox onSelect={handleSelect} aria-labelledby="searchbox" onKeyPress={handleKeyPress}>
       <ComboboxInput value={value} onChange={handleInput} disabled={!ready} placeholder="Search for a place..." />
-      <ComboboxPopover>
+      <ComboboxPopover className="suggestions">
         <ComboboxList>
           {status === "OK" &&
             data.map(({ id, description, structured_formatting: { main_text, secondary_text } }) => (<ComboboxOption key={id} value={description}>
