@@ -26,6 +26,7 @@ export function LoadLocation(newName, latitude, longitude, storeType) {
         beans: {status: 0},
         bread: {status: 0},
         fish: {status: 0},
+        toilet_paper: {status: 0}, 
       };
       isGrocery = true;
     }

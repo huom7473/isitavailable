@@ -87,6 +87,10 @@ export class ItemWidget extends React.Component {
       //return {in: 4, out: 5}; //e.g. entries from last [x] hours are in stock, like 4 in stock vs. 5 oos
     });
   }
+  getItemName(name){
+    return name.charAt(0).toUpperCase() + name.replace(/_/g, " ").slice(1);
+  }
+
   render() {
     this.getReports();
     const ratio = this.state.in / (this.state.in + this.state.out);
@@ -100,7 +104,7 @@ export class ItemWidget extends React.Component {
       <div className="row row-cols-3">
         <div className="col text-center">
           <img id="itemImage" src={this.props.src} />
-          <p className="text-center text-white">{this.props.itemName}</p>
+          <p className="text-center text-white"> {this.getItemName(this.props.itemName)}</p>
         </div>
         <div className="col">
           <Button block variant="success" className="mb-1" onClick={() => this.handleStockChange(true)}>In Stock</Button>
