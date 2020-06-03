@@ -102,8 +102,6 @@ class RestaurantInterface extends React.Component {
         }
       }
     });
-
-
   }
 
   handleWaitTimeReport(time) {
@@ -524,6 +522,7 @@ export default function App() {
         .then(response => response.json())
         .then(results => {
           for(let i = 0; i < results.results.length; i++){
+            results.results[i].typeShort = iconName;
             var marker = new window.google.maps.Marker({
               position: results.results[i].geometry.location,
               map: mapRef,
