@@ -12,7 +12,7 @@ export class ItemSearch extends React.Component{
       }
     }
     componentDidMount(){
-    console.log("markers is " + global.markers);
+    //console.log("markers is " + global.markers);
       const itemsRef = firebase.database().ref('items');
       itemsRef.on('value', snap => {
         let items = snap.val();
@@ -22,7 +22,7 @@ export class ItemSearch extends React.Component{
             item: items[item].item,
           });
         }
-        console.log("im here now: " + itemNames);
+        //console.log("im here now: " + itemNames);
         this.setState({
           itemList: itemNames
         });
@@ -48,7 +48,7 @@ export class ItemSearch extends React.Component{
                                 let avg;
                                 let inCount = 0;
                                 let outCount = 0;
-                                console.log(stores[store].items[inventoryItem]);
+                                //console.log(stores[store].items[inventoryItem]);
                                 for (let reports in stores[store].items[inventoryItem]){
                                     
                                     if (stores[store].items[inventoryItem][reports].status === "in_stock") {
@@ -61,18 +61,22 @@ export class ItemSearch extends React.Component{
                                 if(inCount === 0 && outCount === 0){
                                     avg = -1;
                                 } else {
-                                    console.log("its not -1");
+                                    //console.log("its not -1");
                                     avg = inCount/(inCount+outCount);
                                 }
-                                console.log("avg is "+ avg);
+                                //console.log("avg is "+ avg);
                                 if(avg > 0.8){
                                     global.markers[marker].icon.url = icons["high"];
+                                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                                 } else if (avg > 0.3){
                                     global.markers[marker].icon.url = icons["medium"];
+                                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                                 } else if (avg >= 0){
                                     global.markers[marker].icon.url = icons["low"];
+                                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                                 } else {
                                     global.markers[marker].icon.url = icons["unknown"];
+                                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                                 }
                             }   
                         }
@@ -81,6 +85,7 @@ export class ItemSearch extends React.Component{
                 
                 if(!inDb){
                     global.markers[marker].icon.url = "groceryblue.png"
+                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                 }
               } else {
 

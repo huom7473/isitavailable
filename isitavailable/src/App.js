@@ -67,11 +67,13 @@ export default function App() {
 
     const resetMarkers = React.useCallback(() => {
       //console.log(markers);
+      //console.log(global.markers[0].getIcon());
       for(let i = 0; i < markers.length; i++){
         global.markers[i].setMap(mapRef);
 
         if(global.markers[i].icon.url != icons["R"]){
           global.markers[i].icon.url = icons["G"];
+          global.markers[i].setIcon(global.markers[i].getIcon()); //bandaid fix to force update because too lazy to do it the "correct" way :P
         }
       }
     }, [])
@@ -114,12 +116,12 @@ export default function App() {
               setOpen(true);
             });
             global.markers.push(marker);
-            console.log("number of markers: " + Object.keys(global.markers).length);
-            if(Object.keys(global.markers).length === 40 || Object.keys(global.markers).length === 20){
-              for(let val in global.markers){
-                console.log("lat: " + global.markers[val].position.lng());
-              }
-            }
+            //console.log("number of markers: " + Object.keys(global.markers).length);
+            // if(Object.keys(global.markers).length === 40 || Object.keys(global.markers).length === 20){
+            //   for(let val in global.markers){
+            //     console.log("lat: " + global.markers[val].position.lng());
+            //   }
+            // }
 
           }
         })
@@ -157,7 +159,7 @@ export default function App() {
             >
               {POIsLoading ? 'Loading...' : 'Load Nearby POIs'}
             </Button>
-          <Button variant="danger" onClick={removeMarkers}>Clear POIs</Button>
+          <Button variant="danger" className="mr-2" onClick={removeMarkers}>Clear POIs</Button>
           <Button variant="info" onClick={resetMarkers}>Reset Markers</Button>
         </span>
         <Search pan={pan}/>
