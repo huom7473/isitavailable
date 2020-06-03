@@ -65,14 +65,19 @@ export default function App() {
     }, [])
 
 
-    const tester = () => {
-      //this isn't working rn
-      console.log("resetting markers" + global.markers);
+    const resetMarkers = React.useCallback(() => {
+      //console.log(markers);
       for(let i = 0; i < markers.length; i++){
         global.markers[i].setMap(mapRef);
 
+        if(global.markers[i].icon.url != icons["R"]){
+          global.markers[i].icon.url = icons["G"];
+        }
       }
-    }
+    }, [])
+
+
+   
 
     const loadMarkers = React.useCallback((keypairs) => {
       const center = mapRef.getCenter();
@@ -153,7 +158,7 @@ export default function App() {
               {POIsLoading ? 'Loading...' : 'Load Nearby POIs'}
             </Button>
           <Button variant="danger" onClick={removeMarkers}>Clear POIs</Button>
-          <Button variant="info" onClick={tester}>Testing Button</Button>
+          <Button variant="info" onClick={resetMarkers}>Reset Markers</Button>
         </span>
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>

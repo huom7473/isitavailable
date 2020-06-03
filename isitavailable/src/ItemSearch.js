@@ -2,6 +2,8 @@ import React from "react";
 import firebase from "./firebase.js"
 import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from "@reach/combobox";
 
+
+const icons = {"high": "grocerygreen.png", "medium": "groceryorange.png", "low": "groceryred.png", "unknown": "groceryblue.png"};
 export class ItemSearch extends React.Component{
     constructor(){
       super();
@@ -64,13 +66,13 @@ export class ItemSearch extends React.Component{
                                 }
                                 console.log("avg is "+ avg);
                                 if(avg > 0.8){
-                                    global.markers[marker].icon.url = "grocerygreen.png"
+                                    global.markers[marker].icon.url = icons["high"];
                                 } else if (avg > 0.3){
-                                    global.markers[marker].icon.url = "groceryorange.png"
+                                    global.markers[marker].icon.url = icons["medium"];
                                 } else if (avg >= 0){
-                                    global.markers[marker].icon.url = "groceryred.png"
+                                    global.markers[marker].icon.url = icons["low"];
                                 } else {
-                                    global.markers[marker].icon.url = "groceryblue.png"
+                                    global.markers[marker].icon.url = icons["unknown"];
                                 }
                             }   
                         }
