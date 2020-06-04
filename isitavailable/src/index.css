@@ -11,6 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.ResetButton{
+  position: absolute;
+  left: 210px;
+  top: 78px;
+  max-width: 400px;
+  z-index: 10;
+}
 
 .search1 {
   position: absolute;
@@ -45,6 +52,7 @@ code {
   max-width: 400px;
   z-index: 10;
 }
+
 
 .close {
   outline: 0 !important;

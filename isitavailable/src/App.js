@@ -141,7 +141,7 @@ export default function App() {
       mapRef.panTo({lat, lng});
       smoothZoom(mapRef.getZoom(), defaultZoom);
       //console.log(mapRef.getCenter().lat() + ' ' + mapRef.getCenter().lng());
-      setTimeout(() => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]), 100);
+      setTimeout(() => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]), 1000);
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
@@ -160,8 +160,11 @@ export default function App() {
               {POIsLoading ? 'Loading...' : 'Load Nearby POIs'}
             </Button>
           <Button variant="danger" className="mr-2" onClick={removeMarkers}>Clear POIs</Button>
-          <Button variant="info" onClick={resetMarkers}>Reset Markers</Button>
+          
         </span>
+
+        <Button className="ResetButton" variant="info" onClick={resetMarkers}>Reset Markers</Button>
+
         <Search pan={pan}/>
         <Map onLoad={onLoad}/>
         <ItemSearch />
