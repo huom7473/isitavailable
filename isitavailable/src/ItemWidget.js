@@ -12,6 +12,7 @@ export class ItemWidget extends React.Component {
       showAlert: false
     };
   }
+  static showAlert = false;
   handleStockChange(status) {
     //alert(status ? "in stock request for " + this.props.itemName : "out of stock request for " + this.props.itemName);
     const storesRef = firebase.database().ref('stores');
@@ -34,7 +35,10 @@ export class ItemWidget extends React.Component {
         }
       }
     });
-    this.setState({showAlert: true});
+    if(!ItemWidget.showAlert){ //so that only one alert can show at a time
+      this.setState({showAlert: true});
+      ItemWidget.showAlert = true;
+    }
     //update database with new stock status instead of alerting
   }
   getReports() {
@@ -100,7 +104,7 @@ export class ItemWidget extends React.Component {
       </span>);
     return (
     <div className="container mb-4">
-      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
+      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {ItemWidget.showAlert = false; this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
       <div className="row row-cols-3">
         <div className="col text-center">
           <img id="itemImage" src={this.props.src} />
