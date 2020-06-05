@@ -34,7 +34,7 @@ code {
   top: 5rem;
   left: 0%;
   margin-left: 20px;
-  width: 100%;
+  width: 10%;
   max-width: 400px;
   z-index: 10;
 }
@@ -157,4 +157,8 @@ Note: Beware of modifying this element as it can break the animations - you shou
 /* Styling of overlay */
 .bm-overlay {
   background: rgba(0, 0, 0, 0.3);
+}
+
+.customInputBar {
+  width: 75%;
 }

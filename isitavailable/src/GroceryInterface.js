@@ -1,4 +1,5 @@
 import React from "react";
+import Button from 'react-bootstrap/Button';
 import firebase from './firebase.js';
 import { Combobox, ComboboxInput } from "@reach/combobox";
 import { ItemWidget } from "./ItemWidget";
@@ -8,9 +9,15 @@ export class GroceryInterface extends React.Component {
     super(props);
     this.state = {
       searchVal: '',
-      images: []
+      images: [],
+      customInput: '',
+      storeID: ''
     };
   }
+  getDBName(name){
+    return name.replace(/\s/g, "_").toLowerCase();
+  }
+
   getItems() {
     const storesRef = firebase.database().ref('stores');
     storesRef.on('value', snap => {
@@ -19,6 +26,9 @@ export class GroceryInterface extends React.Component {
       for (let store in stores) {
         if (this.props.location.lat === stores[store].lat && this.props.location.lng === stores[store].long) {
           //console.log("store is: " + stores[store].name);
+          if(store !== this.state.storeID){
+            this.setState({storeID: store});
+          }
           let items = stores[store].items;
           for (let item in items) {
             let i = {
@@ -27,7 +37,7 @@ export class GroceryInterface extends React.Component {
             };
             itemImagePairs.push(i);
           }
-          if (Object.keys(this.state.images).length != Object.keys(itemImagePairs).length) {
+          if (Object.keys(this.state.images).length !== Object.keys(itemImagePairs).length) {
             //console.log("not the same!");
             this.setState({
               images: itemImagePairs
@@ -41,6 +51,47 @@ export class GroceryInterface extends React.Component {
     //console.log(e.target.value);
     this.setState({ searchVal: e.target.value });
   }
+  handleCustomChange(e){
+    this.setState({ customInput: e.target.value });
+  }
+  
+  addCustomItem(){
+    const storesRef = firebase.database().ref('stores');
+    const itemsRef = firebase.database().ref('items');
+    let customItem = this.getDBName(this.state.customInput);
+    itemsRef.once('value', snap => {
+      let items = snap.val();
+      for(let item in items){
+        if(items[item].item === customItem){
+          console.log("already a valid item");
+          return;
+        }
+      }
+      let itemData = {
+        item: customItem
+      };
+      var newPostKey = firebase.database().ref().child('posts').push().key;
+      console.log("writing to db");
+      firebase.database().ref().child('/items/' + newPostKey).set(itemData);
+    });
+
+    storesRef.once('value', snap => {
+      let stores = snap.val();
+      let items = stores[this.state.storeID].items;
+      for(let item in items){
+        if(item === customItem){
+          console.log("item is already in this store");
+          return;
+        }
+      }
+      let itemData = {
+        status: -1
+      };
+      console.log("writing to db");
+      firebase.database().ref().child('/stores/' + this.state.storeID + '/items/' + customItem).set(itemData);
+    });
+  }
+
   render() {
     this.getItems();
     var widgets = this.state.images.map(desc => {
@@ -56,6 +107,13 @@ export class GroceryInterface extends React.Component {
       </Combobox>
       <br /> <br />
       {widgets}
+
+        <label>
+          Add a custom item:
+        </label>
+        <input className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)} />
+        <Button onClick={()=>this.addCustomItem()} >Add</Button>
+      
     </div>);
   }
 }

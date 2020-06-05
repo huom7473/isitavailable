@@ -23,7 +23,6 @@ export class ItemSearch extends React.Component{
             item: items[item].item,
           });
         }
-        //console.log("im here now: " + itemNames);
         this.setState({
           itemList: itemNames
         });
@@ -31,7 +30,7 @@ export class ItemSearch extends React.Component{
     }
 
     getItemName(name){
-        return name.charAt(0).toUpperCase() + name.replace(/_/g, " ").slice(1);
+        return name.replace(/_/g, " ");
       }
     getDBName(name){
         return name.replace(/\s/g, "_").toLowerCase();
@@ -43,12 +42,11 @@ export class ItemSearch extends React.Component{
       };
       const handleSelect = (item) => {
         const storesRef = firebase.database().ref('stores') 
-        console.log("item is " + item);
+
         storesRef.once('value', snap => {
             let isValidItem = false;
             for(let validItem in this.state.itemList){
                 if(this.state.itemList[validItem].item === this.getDBName(item)){
-                    console.log("this is a valid item.");
                     isValidItem = true;
                 }
             }
@@ -56,7 +54,7 @@ export class ItemSearch extends React.Component{
 
           
             for(let marker in global.markers){
-                if(global.markers[marker].icon.url != "restaurant.svg"){
+                if(global.markers[marker].icon.url !== "restaurant.svg"){
                     if(isValidItem){
                         let inDb = false;
                         for(let store in stores){
@@ -64,12 +62,13 @@ export class ItemSearch extends React.Component{
                                 inDb = true;
                                 let itemz;
                                 itemz = stores[store].items;
+                                let itemFound = false;
                                 for(let inventoryItem in itemz){
                                     if(this.getDBName(item) === inventoryItem){
+                                        itemFound = true;
                                         let avg;
                                         let inCount = 0;
                                         let outCount = 0;
-                                        //console.log(stores[store].items[inventoryItem]);
                                         for (let reports in stores[store].items[inventoryItem]){
                                             
                                             if (stores[store].items[inventoryItem][reports].status === "in_stock") {
@@ -82,10 +81,8 @@ export class ItemSearch extends React.Component{
                                         if(inCount === 0 && outCount === 0){
                                             avg = -1;
                                         } else {
-                                            //console.log("its not -1");
                                             avg = inCount/(inCount+outCount);
                                         }
-                                        //console.log("avg is "+ avg);
                                         if(avg > 0.8){
                                             global.markers[marker].icon.url = icons["high"];
                                             global.markers[marker].setIcon(global.markers[marker].getIcon());
@@ -100,6 +97,10 @@ export class ItemSearch extends React.Component{
                                             global.markers[marker].setIcon(global.markers[marker].getIcon());
                                         }
                                     }   
+                                }
+                                if(!itemFound){
+                                    global.markers[marker].icon.url = "groceryblue.png"
+                                    global.markers[marker].setIcon(global.markers[marker].getIcon());
                                 }
                             }
                         } 

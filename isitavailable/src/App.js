@@ -71,7 +71,7 @@ export default function App() {
       for(let i = 0; i < markers.length; i++){
         global.markers[i].setMap(mapRef);
 
-        if(global.markers[i].icon.url != icons["R"]){
+        if(global.markers[i].icon.url !== icons["R"]){
           global.markers[i].icon.url = icons["G"];
           global.markers[i].setIcon(global.markers[i].getIcon()); //bandaid fix to force update because too lazy to do it the "correct" way :P
         }
@@ -83,7 +83,7 @@ export default function App() {
 
     const loadMarkers = React.useCallback((keypairs) => {
       const center = mapRef.getCenter();
-      const proxyurl = "https://cors-anywhere.herokuapp.com/";
+      const proxyurl = "http://localhost:8080/";
       setPOISLoading(true);
 
       for(let i = 0; i < keypairs.length; i++) { //handles multiple keywords

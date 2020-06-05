@@ -82,7 +82,7 @@ export class ItemWidget extends React.Component {
           }
         }
       }
-      if (inCount != this.state.in || outCount != this.state.out) {
+      if (inCount !== this.state.in || outCount !== this.state.out) {
         this.setState({
           in: inCount,
           out: outCount

@@ -90,7 +90,7 @@ export class RestaurantInterface extends React.Component {
       if (Number.isNaN(crowdAvg)) {
         crowdAvg = 10000;
       }
-      if (crowdAvg != this.state.crowdCount) {
+      if (crowdAvg !== this.state.crowdCount) {
         this.setState({
           crowdCount: crowdAvg
         });
@@ -124,7 +124,7 @@ export class RestaurantInterface extends React.Component {
       if (Number.isNaN(waitAvg)) {
         waitAvg = 10000;
       }
-      if (waitAvg != this.state.waitCount) {
+      if (waitAvg !== this.state.waitCount) {
         this.setState({
           waitCount: waitAvg
         });
