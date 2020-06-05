@@ -4,7 +4,7 @@ import firebase from './firebase.js';
 import { Combobox, ComboboxInput } from "@reach/combobox";
 import { ItemWidget } from "./ItemWidget";
 
-const itemIcons = {"eggs": "egg.jpg", "beans": "beans.jpg", "bread": "bread.jpg", "chicken": "chicken.jpg", "toilet_paper": "toilet_paper.jpg",
+const itemIcons = {"eggs": "eggs.jpg", "beans": "beans.jpg", "bread": "bread.jpg", "chicken": "chicken.jpg", "toilet_paper": "toilet_paper.jpg",
 "fish": "fish.jpg", "flour": "flour.jpg", "milk": "milk.jpg", "pasta": "pasta.jpg", "rice": "rice.jpg", "water": "water.jpg"};
 
 export class GroceryInterface extends React.Component {
