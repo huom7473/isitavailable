@@ -58,7 +58,7 @@ export default function App() {
 
     const removeMarkers = React.useCallback(() => {
       //console.log(markers);
-      for(let i = 0; i < markers.length; i++){
+      for(let i = 0; i < global.markers.length; i++){
         global.markers[i].setMap(null);
       }
       global.markers = [];
