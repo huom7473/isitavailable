@@ -68,7 +68,7 @@ export default function App() {
     const resetMarkers = React.useCallback(() => {
       //console.log(markers);
       //console.log(global.markers[0].getIcon());
-      for(let i = 0; i < markers.length; i++){
+      for(let i = 0; i < global.markers.length; i++){
         global.markers[i].setMap(mapRef);
 
         if(global.markers[i].icon.url !== icons["R"]){
