@@ -4,6 +4,9 @@ import firebase from './firebase.js';
 import { Combobox, ComboboxInput } from "@reach/combobox";
 import { ItemWidget } from "./ItemWidget";
 
+const itemIcons = {"eggs": "egg.jpg", "beans": "beans.jpg", "bread": "bread.jpg", "chicken": "chicken.jpg", "toilet_paper": "toilet_paper.jpg",
+"fish": "fish.jpg", "flour": "flour.jpg", "milk": "milk.jpg", "pasta": "pasta.jpg", "rice": "rice.jpg", "water": "water.jpg"};
+
 export class GroceryInterface extends React.Component {
   constructor(props) {
     super(props);
@@ -33,7 +36,7 @@ export class GroceryInterface extends React.Component {
           for (let item in items) {
             let i = {
               name: item,
-              src: "" + item + ".jpg"
+              src: itemIcons.hasOwnProperty(item) ? itemIcons[item] : "grocery.png"
             };
             itemImagePairs.push(i);
           }
@@ -108,7 +111,7 @@ export class GroceryInterface extends React.Component {
       <br /> <br />
       {widgets}
 
-        <label>
+        <label className = "mr-2">
           Add a custom item:
         </label>
         <input className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)} />
