@@ -2,6 +2,7 @@ import React from "react";
 import firebase from './firebase.js';
 import Button from 'react-bootstrap/Button';
 import Alert from "react-bootstrap/Alert";
+import Cookies from 'universal-cookie'
 export class ItemWidget extends React.Component {
   constructor(props) {
     super(props);
@@ -14,6 +15,9 @@ export class ItemWidget extends React.Component {
   }
   static showAlert = false;
   handleStockChange(status) {
+    const cookies = new Cookies();
+    console.log(cookies.get('foo'));
+    cookies.set('foo', 'bar');
     //alert(status ? "in stock request for " + this.props.itemName : "out of stock request for " + this.props.itemName);
     const storesRef = firebase.database().ref('stores');
     storesRef.once('value', snap => {
@@ -38,6 +42,10 @@ export class ItemWidget extends React.Component {
     if(!ItemWidget.showAlert){ //so that only one alert can show at a time
       this.setState({showAlert: true});
       ItemWidget.showAlert = true;
+      setTimeout(() => {
+        this.setState({showAlert: false});
+        ItemWidget.showAlert = false;
+    }, 5000) //alert should only show for 5 sec
     }
     //update database with new stock status instead of alerting
   }
