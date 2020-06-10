@@ -40,7 +40,7 @@ export class RestaurantInterface extends React.Component {
       cookies.set(cookieName, true, {expires: d})
     }
     reportsCookie = cookies.get('totalReportsMade'); //have to refetch in case we just set it
-    console.log(reportsCookie.value);
+    //console.log(reportsCookie.value);
     cookies.set('totalReportsMade', {value: reportsCookie.value + 1, expires: reportsCookie.expires}, {expires: new Date(reportsCookie.expires)});
     return true;
   }
