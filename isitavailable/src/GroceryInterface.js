@@ -2,6 +2,7 @@ import React from "react";
 import Button from 'react-bootstrap/Button';
 import firebase from './firebase.js';
 import { Combobox, ComboboxInput } from "@reach/combobox";
+import Alert from 'react-bootstrap/Alert'
 import { ItemWidget } from "./ItemWidget";
 
 const itemIcons = {"eggs": "eggs.jpg", "beans": "beans.jpg", "bread": "bread.jpg", "chicken": "chicken.jpg", "toilet_paper": "toilet_paper.jpg",
@@ -14,7 +15,8 @@ export class GroceryInterface extends React.Component {
       searchVal: '',
       images: [],
       customInput: '',
-      storeID: ''
+      storeID: '',
+      showCustomInputError: false
     };
   }
   getDBName(name){
@@ -59,6 +61,12 @@ export class GroceryInterface extends React.Component {
   }
   
   addCustomItem(){
+    if(!(/^[a-zA-Z]+$/.test(this.state.customInput))){
+      this.setState({showCustomInputError: true});
+      setTimeout(() => this.setState({showCustomInputError: false}), 5000);
+      return;
+    }
+
     const storesRef = firebase.database().ref('stores');
     const itemsRef = firebase.database().ref('items');
     let customItem = this.getDBName(this.state.customInput);
@@ -111,6 +119,13 @@ export class GroceryInterface extends React.Component {
       </Combobox>
       <br /> <br />
       {widgets}
+      <Alert id="groceryAlert"
+             show={this.state.showCustomInputError} 
+             variant="danger" 
+             onClose={() => {this.setState({showCustomInputError: false})}} 
+             dismissible>
+        Please enter a valid item name. (A-Z and spaces allowed)
+      </Alert>
       <label className = "mr-2">
         Add a custom item:
       </label>
