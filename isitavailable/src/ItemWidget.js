@@ -104,7 +104,13 @@ export class ItemWidget extends React.Component {
       </span>);
     return (
     <div className="container mb-4">
-      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {ItemWidget.showAlert = false; this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
+      <Alert id="successMessage"
+             show={this.state.showAlert} 
+             variant="success" 
+             onClose={() => {ItemWidget.showAlert = false; this.setState({showAlert: false})}} 
+             dismissible>
+        Input Received!
+      </Alert>
       <div className="row row-cols-3">
         <div className="col text-center">
           <img id="itemImage" src={this.props.src} />

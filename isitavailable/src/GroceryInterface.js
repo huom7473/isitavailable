@@ -93,6 +93,7 @@ export class GroceryInterface extends React.Component {
       console.log("writing to db");
       firebase.database().ref().child('/stores/' + this.state.storeID + '/items/' + customItem).set(itemData);
     });
+    this.setState({customInput: ''});
   }
 
   render() {
@@ -114,7 +115,7 @@ export class GroceryInterface extends React.Component {
         <label className = "mr-2">
           Add a custom item:
         </label>
-        <input className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)} />
+        <input value={this.state.customInput} className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)}/>
         <Button onClick={()=>this.addCustomItem()} >Add</Button>
       
     </div>);
