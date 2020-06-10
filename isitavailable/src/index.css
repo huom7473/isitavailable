@@ -62,12 +62,13 @@ code {
   z-index: 10;
 }
 
-#successMessage {
+#groceryAlert {
   position: absolute;
   top: 20px;
   right: 40%;
   outline: 0;
   margin: auto;
+  z-index: 10;
 }
 
 @media (max-width: 1200px) {

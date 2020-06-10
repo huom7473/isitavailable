@@ -66,7 +66,7 @@ export class GroceryInterface extends React.Component {
       let items = snap.val();
       for(let item in items){
         if(items[item].item === customItem){
-          console.log("already a valid item");
+          //console.log("already a valid item");
           return;
         }
       }
@@ -83,14 +83,14 @@ export class GroceryInterface extends React.Component {
       let items = stores[this.state.storeID].items;
       for(let item in items){
         if(item === customItem){
-          console.log("item is already in this store");
+          //console.log("item is already in this store");
           return;
         }
       }
       let itemData = {
         status: -1
       };
-      console.log("writing to db");
+      //console.log("writing to db");
       firebase.database().ref().child('/stores/' + this.state.storeID + '/items/' + customItem).set(itemData);
     });
     this.setState({customInput: ''});
@@ -111,12 +111,11 @@ export class GroceryInterface extends React.Component {
       </Combobox>
       <br /> <br />
       {widgets}
-
-        <label className = "mr-2">
-          Add a custom item:
-        </label>
-        <input value={this.state.customInput} className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)}/>
-        <Button onClick={()=>this.addCustomItem()} >Add</Button>
+      <label className = "mr-2">
+        Add a custom item:
+      </label>
+      <input value={this.state.customInput} className='customInputBar mr-2' type="text" onChange={e => this.handleCustomChange(e)}/>
+      <Button onClick={()=>this.addCustomItem()} >Add</Button>
       
     </div>);
   }

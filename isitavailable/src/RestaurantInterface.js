@@ -2,6 +2,7 @@ import React from "react";
 import firebase from './firebase.js';
 import Button from 'react-bootstrap/Button';
 import Alert from "react-bootstrap/Alert";
+import Cookies from 'universal-cookie';
 export class RestaurantInterface extends React.Component {
   constructor(props) {
     super(props);
@@ -9,10 +10,45 @@ export class RestaurantInterface extends React.Component {
       changed: false,
       crowdCount: -1,
       waitCount: -1,
-      showAlert: false
+      showAlert: false,
+      showDuplicateError: false,
+      showTooManyError: false
     };
   }
+  okToProceed(type) { // c for crowded, w for wait time
+    const cookies = new Cookies();
+    var reportsCookie = cookies.get('totalReportsMade');
+    const cookieName = this.props.location.lat + " " + this.props.location.lng + type;
+    const dCookie = cookies.get(cookieName);
+    const d = new Date();
+    d.setTime(d.getTime() + (3 * 60 * 60000));
+    
+    if(reportsCookie) {
+      if (reportsCookie.value >= 10) { // limit of 10 reports every 3 hours 
+        this.setState({showTooManyError: true, showAlert: false, showDuplicateError: false}); //hide other alerts
+        setTimeout(() => this.setState({showTooManyError: false}), 5000);
+        return false;
+      } 
+    } else {
+      cookies.set('totalReportsMade', {value: 0, expires: d});
+    }
+    if (dCookie) {
+      this.setState({showDuplicateError: true, showTooManyError: false, showAlert: false});
+      setTimeout(() => this.setState({showDuplicateError: false}), 5000);
+      return false;
+    } else {
+      cookies.set(cookieName, true, {expires: d})
+    }
+    reportsCookie = cookies.get('totalReportsMade'); //have to refetch in case we just set it
+    console.log(reportsCookie.value);
+    cookies.set('totalReportsMade', {value: reportsCookie.value + 1, expires: reportsCookie.expires}, {expires: new Date(reportsCookie.expires)});
+    return true;
+  }
+  
   handleCrowdedReport(status) {
+    if (!this.okToProceed('c')){
+      return;
+    }
     this.setState({showAlert: true});
     //alert("crowdedness report with status " + status);
     const storesRef = firebase.database().ref('stores');
@@ -36,6 +72,9 @@ export class RestaurantInterface extends React.Component {
     });
   }
   handleWaitTimeReport(time) {
+    if (!this.okToProceed('w')){
+      return;
+    }
     this.setState({showAlert: true});
     //alert("wait time report with time " + time);
     if (time < 0) {
@@ -155,7 +194,27 @@ export class RestaurantInterface extends React.Component {
     }
     let waitStatus = (this.state.waitCount === -1 || this.state.waitCount > 9999) ? "unknown" : this.state.waitCount + " mins";
     return (<div>
-      <Alert id="successMessage" show={this.state.showAlert} variant="success" onClose={() => {this.setState({showAlert: false})}} dismissible>Input Received!</Alert>
+      <Alert id="groceryAlert"
+             show={this.state.showAlert} 
+             variant="success" 
+             onClose={() => {this.setState({showAlert: false})}} 
+             dismissible>
+        Input Received!
+      </Alert>
+      <Alert id="groceryAlert"
+             show={this.state.showTooManyError} 
+             variant="danger" 
+             onClose={() => {this.setState({showTooManyError: false})}} 
+             dismissible>
+        Too many reports. Please try again later.
+      </Alert>
+      <Alert id="groceryAlert"
+             show={this.state.showDuplicateError}
+             variant="danger" 
+             onClose={() => {this.setState({showDuplicateError: false})}} 
+             dismissible>
+        Status already reported. Please try again later.
+      </Alert>
       <h2>Reported Activity Level: <span className={textColor}>{cheeseWheel}</span></h2>
       <p>Wait time (approx.): {waitStatus}</p>
       <br />

@@ -10,14 +10,37 @@ export class ItemWidget extends React.Component {
       changed: false,
       in: 0,
       out: 0,
-      showAlert: false
+      showAlert: false,
+      showDuplicateError: false,
+      showTooManyError: false
     };
   }
   static showAlert = false;
   handleStockChange(status) {
     const cookies = new Cookies();
-    console.log(cookies.get('foo'));
-    cookies.set('foo', 'bar');
+    var reportsCookie = cookies.get('totalReportsMade');
+    const itemCookieName = this.props.location.lat + " " + this.props.location.lng + " " + this.props.itemName;
+    const itemCookie = cookies.get(itemCookieName);
+    const d = new Date();
+    d.setTime(d.getTime() + (3*60*60000)); // cookies set expire after 3 hours
+    if (reportsCookie) {
+      if (reportsCookie.value >= 10) { // limit of 10 reports every 3 hours 
+        this.setState({showTooManyError: true, showAlert: false, showDuplicateError: false}); //hide other alerts
+        setTimeout(() => this.setState({showTooManyError: false}), 5000);
+        return;
+      }
+    } else {
+      cookies.set('totalReportsMade', {value: 0, expires: d});
+    }
+    if (itemCookie) {
+      this.setState({showDuplicateError: true, showTooManyError: false, showAlert: false});
+      setTimeout(() => this.setState({showDuplicateError: false}), 5000);
+      return;
+    } else {
+      cookies.set(itemCookieName, true, {expires: d});
+    }
+    reportsCookie = cookies.get('totalReportsMade'); //have to refetch in case we just set it
+    cookies.set('totalReportsMade', {value: reportsCookie.value + 1, expires: reportsCookie.expires}, {expires: new Date(reportsCookie.expires)});
     //alert(status ? "in stock request for " + this.props.itemName : "out of stock request for " + this.props.itemName);
     const storesRef = firebase.database().ref('stores');
     storesRef.once('value', snap => {
@@ -40,7 +63,7 @@ export class ItemWidget extends React.Component {
       }
     });
     if(!ItemWidget.showAlert){ //so that only one alert can show at a time
-      this.setState({showAlert: true});
+      this.setState({showAlert: true, showDuplicateError: false, showTooManyError: false});
       ItemWidget.showAlert = true;
       setTimeout(() => {
         this.setState({showAlert: false});
@@ -112,12 +135,26 @@ export class ItemWidget extends React.Component {
       </span>);
     return (
     <div className="container mb-4">
-      <Alert id="successMessage"
+      <Alert id="groceryAlert"
              show={this.state.showAlert} 
              variant="success" 
              onClose={() => {ItemWidget.showAlert = false; this.setState({showAlert: false})}} 
              dismissible>
         Input Received!
+      </Alert>
+      <Alert id="groceryAlert"
+             show={this.state.showTooManyError} 
+             variant="danger" 
+             onClose={() => {this.setState({showTooManyError: false})}} 
+             dismissible>
+        Too many reports. Please try again later.
+      </Alert>
+      <Alert id="groceryAlert"
+             show={this.state.showDuplicateError}
+             variant="danger" 
+             onClose={() => {this.setState({showDuplicateError: false})}} 
+             dismissible>
+        Status already reported. Please try again later.
       </Alert>
       <div className="row row-cols-3">
         <div className="col text-center">

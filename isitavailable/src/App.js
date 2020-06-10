@@ -27,7 +27,7 @@ export default function App() {
       mapRef = map;
       let startLat, startLng;
       if("geolocation" in navigator){
-        console.log("geolocating");
+        //console.log("geolocating");
         navigator.geolocation.getCurrentPosition(position => {
           startLat = position.coords.latitude;
           startLng = position.coords.longitude;
@@ -142,6 +142,7 @@ export default function App() {
       smoothZoom(mapRef.getZoom(), defaultZoom);
       //console.log(mapRef.getCenter().lat() + ' ' + mapRef.getCenter().lng());
       setTimeout(() => loadMarkers([{keyword: "groceries", iconName: "G"}, {keyword: "restaurants", iconName: "R"}]), 1000);
+      //have to settimeout because mapRef.panTo takes some time to actually set the center of the map...
     }, [])
 
     if (loadError) return "Maps failed to load. Please try again later or check connection.";
