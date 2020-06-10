@@ -13,7 +13,7 @@ To run:
 	 Alternatively, you can choose to change the value of proxyurl in App.js:86 to any cors-anywhere server (with a slash appended), such 	 as the publicly available https://cors-anywhere.herokuapp.com/
 4) Add a .env.local file (in isitavailable/isitavailable/.env.local, the directory that contains public, src, etc.) with the following configuration variables:
 
-	REACT_APP_GOOGLE_MAPS_API_KEY=XXXXX<br/>
+  REACT_APP_GOOGLE_MAPS_API_KEY=XXXXX<br/>
 	REACT_APP_FIREBASE_API_KEY=XXXXX<br/>
 	REACT_APP_FIREBASE_AUTH_DOMAIN=XXXXX<br/>
 	REACT_APP_FIREBASE_DATABASE_URL=XXXXX<br/>
