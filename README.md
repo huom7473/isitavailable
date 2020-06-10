@@ -8,12 +8,12 @@ To run:
 3) In a separate shell, change directory into ../isitavailable/isitavailable/node_modules/cors-anywhere and run the command "node server.js". This is necessary for loading markers and location data.
 4) Add a .env.local file (path should be ../isitavailable/isitavailable/.env.local) with the following configuration variables:
 
-REACT_APP_GOOGLE_MAPS_API_KEY=XXXXX
-REACT_APP_FIREBASE_API_KEY=XXXXX
-REACT_APP_FIREBASE_AUTH_DOMAIN=XXXXX
-REACT_APP_FIREBASE_DATABASE_URL=XXXXX
-REACT_APP_PROJECT_ID=XXXXX
-REACT_APP_STORAGE_BUCKET=XXXXX
+REACT_APP_GOOGLE_MAPS_API_KEY=XXXXX<br/>
+REACT_APP_FIREBASE_API_KEY=XXXXX<br/>
+REACT_APP_FIREBASE_AUTH_DOMAIN=XXXXX<br/>
+REACT_APP_FIREBASE_DATABASE_URL=XXXXX<br/>
+REACT_APP_PROJECT_ID=XXXXX<br/>
+REACT_APP_STORAGE_BUCKET=XXXXX<br/>
 REACT_APP_MESSAGING_SENDER_ID=XXXXX
 
 5) Run npm start
